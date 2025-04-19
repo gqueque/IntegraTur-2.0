@@ -9,3 +9,6 @@ class EventoViewSet(viewsets.ModelViewSet):
 
 def cadastro_evento(request):
     return render(request, 'cadastro_evento/cadastro.html')
+
+def eventos(request):
+    pass

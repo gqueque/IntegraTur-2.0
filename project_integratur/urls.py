@@ -11,5 +11,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     #rota, view reponsável, nome de referência
-    path('', views.cadastro_evento, name='cadastro')
+    #cadastro_evento
+    path('', views.cadastro_evento, name='cadastro'),
+    #cadastro_evento/eventos
+    path("eventos/", views.eventos, name="listagem_evento"),
+
 ]
