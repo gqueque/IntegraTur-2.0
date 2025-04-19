@@ -1,87 +1,209 @@
 <!doctype html>
 <html lang="pt-br">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% load static %}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Novo Evento - IntegraTur</title>
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+  
+    /* Topo amarelo com logo */
+    .top-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      background-color: #F8EF1F;
+      z-index: 1030;
+      display: flex;
+      align-items: center;
+      padding-left: 20px;
+      border-bottom: 1px solid #ccc;
+    }
+  
+    .logo {
+      height: 55px;
+      max-width: 90%;
+    }
+  
+    /* Sidebar agora começa abaixo da faixa do topo */
+    .sidebar {
+      width: 220px;
+      height: calc(100vh - 80px);
+      position: fixed;
+      top: 80px;
+      left: 0;
+      background-color: #ffffff;
+      border-right: 1px solid #dee2e6;
+      padding: 0;
+    }
+  
+    .sidebar .nav-link {
+      color: #333;
+      margin-bottom: 10px;
+    }
+  
+    .sidebar .nav-link.active {
+      font-weight: bold;
+      color: #0d6efd;
+    }
+  
+    /* Conteúdo deslocado para o lado e abaixo da faixa do topo */
+    .content {
+      margin-left: 240px;
+      margin-top: 100px;
+      padding: 20px;
+    }
+  
+    .form-section {
+      padding: 15px;
+    }
+  
+    .form-label, .form-control {
+      font-size: 0.9rem;
+    }
+  
+    .form-control {
+      padding: 6px 10px;
+    }
+  
+    .form-check {
+      font-size: 0.9rem;
+    }
+  
+    .btn-save {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+    }
+  </style>
+  
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <title>Cadastro de Evento - IntegraTur</title>
-  </head>
-  <body>
-    <nav style="background-color: gold !important;" class="navbar navbar-light bg-light mb-4">
-      <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1">IntegraTur</span>
+
+  </style>
+</head>
+<body>
+<!-- Topo da página com faixa amarela e logo -->
+<div class="top-header d-flex align-items-center px-4">
+  <img src="{% static 'imagens/image-removebg-preview.png' %}" alt="Logo IntegraTur" class="logo">
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <!-- Menu de navegação -->
+  <nav class="nav flex-column mt-4">
+    <a class="nav-link" href="{% url 'home' %}">🏠 Home</a>
+    <a class="nav-link" href="{% url 'home' %}">📅 Calendário de Eventos</a>
+    <a class="nav-link active" href="{% url 'home' %}">➕ Adicionar Evento</a>
+    <a class="nav-link" href="{% url 'home' %}">🗺️ Mapa de Evento</a>
+  </nav>
+</div>
+
+  
+
+  <!-- Conteúdo principal -->
+  <div class="content">
+    <h2 class="text-center mb-4">Novo Evento</h2>
+
+    <form action="{% url 'listagem_evento' %}" method="post">
+      {% csrf_token %}
+      <div class="row">
+        <!-- Coluna esquerda -->
+        <div class="col-md-6">
+          <div class="card form-section mb-3">
+            <h5>Informações Básicas</h5>
+            <div class="mb-2">
+              <label class="form-label">Título</label>
+              <input name="titulo" type="text" class="form-control form-control-sm">
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Responsável</label>
+              <input name="responsavel" type="text" class="form-control form-control-sm">
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Local</label>
+              <input name="local" type="text" class="form-control form-control-sm">
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Descrição</label>
+              <textarea name="descricao" class="form-control form-control-sm" rows="2"></textarea>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Data</label>
+              <input name="data" type="date" class="form-control form-control-sm">
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Atrações</label>
+              <input name="atracoes" type="text" class="form-control form-control-sm">
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Orçamento Estimado</label>
+              <input name="orcamento_estimado" type="number" class="form-control form-control-sm">
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Programação</label>
+              <textarea name="programacao" class="form-control form-control-sm" rows="2" placeholder="Ex: ['Abertura', 'Show', 'Encerramento']"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coluna direita -->
+        <div class="col-md-6">
+          <div class="card form-section mb-3">
+            <h5>Recursos</h5>
+            <div class="mb-2">
+              <label class="form-label">Equipamento</label>
+              <textarea name="equipamento" class="form-control form-control-sm" rows="2"></textarea>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Fornecedores</label>
+              <textarea name="fornecedores" class="form-control form-control-sm" rows="2"></textarea>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Patrocinadores</label>
+              <textarea name="patrocinadores" class="form-control form-control-sm" rows="2"></textarea>
+            </div>
+          </div>
+
+          <div class="card form-section mb-3">
+            <h5>Requisitos</h5>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="alvara" id="alvara">
+              <label class="form-check-label" for="alvara">Alvará</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="licenca_bombeiros" id="licenca_bombeiros">
+              <label class="form-check-label" for="licenca_bombeiros">Licença Bombeiros</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="autorizacao_sonora" id="autorizacao_sonora">
+              <label class="form-check-label" for="autorizacao_sonora">Autorização Sonora</label>
+            </div>
+          </div>
+
+          <div class="card form-section mb-3">
+            <h5>Outros</h5>
+            <div class="mb-2">
+              <label class="form-label">Segurança</label>
+              <input name="seguranca" type="text" class="form-control form-control-sm">
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Marketing</label>
+              <input name="marketing" type="text" class="form-control form-control-sm">
+            </div>
+          </div>
+        </div>
       </div>
-    </nav>
 
-    <div class="container">
-      <h1 class="mb-4 text-center">Cadastro de Evento</h1>
+      <button type="submit" class="btn btn-primary btn-save">Salvar</button>
+    </form>
+  </div>
 
-      <form action="{% url 'listagem_evento' %}" method="post">
-        {% csrf_token %}
-        <div class="mb-3">
-          <label class="form-label">Título</label>
-          <input name="titulo" type="text" class="form-control">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Responsável</label>
-          <input name="responsavel" type="text" class="form-control">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Local</label>
-          <input name="local" type="text" class="form-control">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Descrição</label>
-          <textarea name="descricao" class="form-control" rows="3"></textarea>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Data</label>
-          <input name="data" type="date" class="form-control">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Estratégia de Marketing</label>
-          <textarea name="marketing" class="form-control" rows="2"></textarea>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Orçamento Estimado</label>
-          <input name="orcamento_estimado" type="number" step="0.01" class="form-control">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Programação (JSON)</label>
-          <textarea name="programacao" class="form-control" rows="2" placeholder='Ex: ["Abertura", "Palestra", "Encerramento"]'></textarea>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Equipamento</label>
-          <textarea name="equipamento" class="form-control" rows="2"></textarea>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Fornecedores</label>
-          <textarea name="fornecedores" class="form-control" rows="2"></textarea>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Patrocinadores</label>
-          <textarea name="patrocinadores" class="form-control" rows="2"></textarea>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Alinhamento com Órgãos de Controle</label>
-          <textarea name="alinhamento_orgao_controle" class="form-control" rows="2"></textarea>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Contratações</label>
-          <textarea name="contratacoes" class="form-control" rows="2"></textarea>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Estruturas</label>
-          <textarea name="estruturas" class="form-control" rows="2"></textarea>
-        </div>
-
-        <div class="text-center">
-          <button type="submit" class="btn btn-primary">Cadastrar Evento</button>
-        </div>
-      </form>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

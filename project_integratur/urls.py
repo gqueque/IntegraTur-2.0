@@ -15,5 +15,7 @@ urlpatterns = [
     path('', views.cadastro_evento, name='cadastro'),
     #cadastro_evento/eventos
     path("eventos/", views.eventos, name="listagem_evento"),
+    path('', views.home, name='home'),
+    
 
 ]

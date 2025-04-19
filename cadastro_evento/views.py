@@ -53,3 +53,6 @@ def eventos(request):
         return redirect('cadastro_evento')  
 
     return redirect('cadastro_evento')
+def home(request):
+    return render(request, 'cadastro_evento/home.html')
+
