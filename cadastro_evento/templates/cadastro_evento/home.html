@@ -1,105 +1,38 @@
-<!doctype html>
-<html lang="pt-br">
-{% load static %}
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <title>Novo Evento - IntegraTur</title>
-  <style>
-    body {
-      background-color: #f8f9fa;
-    }
-  
-    /* Topo amarelo com logo */
-    .top-header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 80px;
-      background-color: #F8EF1F;
-      z-index: 1030;
-      display: flex;
-      align-items: center;
-      padding-left: 20px;
-      border-bottom: 1px solid #ccc;
-    }
-  
-    .logo {
-      height: 55px;
-      max-width: 90%;
-    }
-  
-    /* Sidebar agora começa abaixo da faixa do topo */
-    .sidebar {
-      width: 220px;
-      height: calc(100vh - 80px);
-      position: fixed;
-      top: 80px;
-      left: 0;
-      background-color: #ffffff;
-      border-right: 1px solid #dee2e6;
-      padding: 0;
-    }
-  
-    .sidebar .nav-link {
-      color: #333;
-      margin-bottom: 10px;
-    }
-  
-    .sidebar .nav-link.active {
-      font-weight: bold;
-      color: #0d6efd;
-    }
-  
-    /* Conteúdo deslocado para o lado e abaixo da faixa do topo */
-    .content {
-      margin-left: 240px;
-      margin-top: 100px;
-      padding: 20px;
-    }
-  
-    .form-section {
-      padding: 15px;
-    }
-  
-    .form-label, .form-control {
-      font-size: 0.9rem;
-    }
-  
-    .form-control {
-      padding: 6px 10px;
-    }
-  
-    .form-check {
-      font-size: 0.9rem;
-    }
-  
-    .btn-save {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-    }
-  </style>
-  
+{% extends "cadastro_evento/base.html" %}
+{%block conteudo%}
 
 
-  </style>
-</head>
-<body>
-<!-- Topo da página com faixa amarela e logo -->
-<div class="top-header d-flex align-items-center px-4">
-  <img src="{% static 'imagens/image-removebg-preview.png' %}" alt="Logo IntegraTur" class="logo">
-</div>
-
-<!-- Sidebar -->
-<div class="sidebar">
-  <!-- Menu de navegação -->
-  <nav class="nav flex-column mt-4">
-    <a class="nav-link" href="{% url 'home' %}">🏠 Home</a>
-    <a class="nav-link" href="{% url 'home' %}">📅 Calendário de Eventos</a>
-    <a class="nav-link active" href="{% url 'home' %}">➕ Adicionar Evento</a>
-    <a class="nav-link" href="{% url 'home' %}">🗺️ Mapa de Evento</a>
-  </nav>
-</div>
+  <!-- Conteúdo -->
+  <div class="content">
+    <div class="filtro mb-4">
+      <h5>Filtrar por categoria</h5>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="cultura">
+        <label class="form-check-label" for="cultura">Secretaria de Cultura</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="turismo">
+        <label class="form-check-label" for="turismo">Secretaria de Turismo</label>
+      </div>
+    </div>
+  
+    {% for evento in eventos %}
+      <div class="card mb-4 shadow-sm p-3 rounded d-flex" style="border: 1px solid #ccc;">
+        {% if evento.imagem %}
+          <img src="{{ evento.imagem.url }}" alt="Imagem do Evento" style="width: 180px; height: 120px; object-fit: cover; border-radius: 10px;">
+        {% endif %}
+  
+        <div class="ms-3 flex-grow-1">
+          <h5>{{ evento.titulo }}</h5>
+          <p class="text-muted">{{ evento.data|date:"d \d\e F \d\e Y" }}</p>
+          <p>{{ evento.descricao|truncatechars:120 }}</p>
+          <p class="mb-1 text-secondary"><i>Responsável: {{ evento.responsavel }}</i></p>
+          <a href="#" class="btn btn-outline-secondary btn-sm mt-1">Saiba Mais</a>
+        </div>
+      </div>
+    {% empty %}
+      <p>Nenhum evento encontrado.</p>
+    {% endfor %}
+  </div>
+  
+{% endblock %}

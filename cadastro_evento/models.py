@@ -31,6 +31,12 @@ class Evento(models.Model):
     )
     contratacoes = models.TextField(blank=True, null=True, verbose_name="Contratações")
     estruturas = models.TextField(blank=True, null=True, verbose_name="Estruturas")
+    imagem = models.ImageField(
+        upload_to='eventos/',
+        blank=True,
+        null=True,
+        verbose_name='Imagem do Evento'
+    )
 
     def __str__(self):  
         return self.titulo

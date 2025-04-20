@@ -26,6 +26,7 @@ def eventos(request):
         alinhamento = request.POST.get('alinhamento_orgao_controle')
         contratacoes = request.POST.get('contratacoes')
         estruturas = request.POST.get('estruturas')
+        imagem = request.FILES.get('imagem')
 
         import json
         try:
@@ -47,12 +48,14 @@ def eventos(request):
             patrocinadores=patrocinadores,
             alinhamento_orgao_controle=alinhamento,
             contratacoes=contratacoes,
-            estruturas=estruturas
+            estruturas=estruturas,
+            imagem=imagem,
         )
 
         return redirect('cadastro_evento')  
 
     return redirect('cadastro_evento')
 def home(request):
-    return render(request, 'cadastro_evento/home.html')
+    eventos = Evento.objects.all().order_by('-data')  # busca todos, ordena por data
+    return render(request, 'cadastro_evento/home.html', {'eventos': eventos})
 

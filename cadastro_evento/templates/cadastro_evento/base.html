@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-br">
+{% load static %}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Novo Evento - IntegraTur</title>
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+  
+    /* Topo amarelo com logo */
+    .top-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      background-color: #F8EF1F;
+      z-index: 1030;
+      display: flex;
+      align-items: center;
+      padding-left: 20px;
+      border-bottom: 1px solid #ccc;
+    }
+  
+    .logo {
+      height: 55px;
+      max-width: 90%;
+    }
+  
+    /* Sidebar agora começa abaixo da faixa do topo */
+    .sidebar {
+      width: 220px;
+      height: calc(100vh - 80px);
+      position: fixed;
+      top: 80px;
+      left: 0;
+      background-color: #ffffff;
+      border-right: 1px solid #dee2e6;
+      padding: 0;
+    }
+  
+    .sidebar .nav-link {
+      color: #333;
+      margin-bottom: 10px;
+    }
+  
+    .sidebar .nav-link.active {
+      font-weight: bold;
+      color: #0d6efd;
+    }
+  
+    /* Conteúdo deslocado para o lado e abaixo da faixa do topo */
+    .content {
+      margin-left: 240px;
+      margin-top: 100px;
+      padding: 20px;
+    }
+  
+    .form-section {
+      padding: 15px;
+    }
+  
+    .form-label, .form-control {
+      font-size: 0.9rem;
+    }
+  
+    .form-control {
+      padding: 6px 10px;
+    }
+  
+    .form-check {
+      font-size: 0.9rem;
+    }
+  
+    .btn-save {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+    }
+  </style>
+  
+
+
+  </style>
+</head>
+<body>
+<!-- Topo da página com faixa amarela e logo -->
+<div class="top-header d-flex align-items-center px-4">
+  <img src="{% static 'imagens/image-removebg-preview.png' %}" alt="Logo IntegraTur" class="logo">
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <!-- Menu de navegação -->
+  <nav class="nav flex-column mt-4">
+    <a class="nav-link" href="{% url 'home' %}">🏠 Home</a>
+    <a class="nav-link" href="{% url 'home' %}">📅 Calendário de Eventos</a>
+    <a class="nav-link active" href="{% url 'cadastro' %}">➕ Adicionar Evento</a>
+    <a class="nav-link" href="{% url 'home' %}">🗺️ Mapa de Evento</a>
+  </nav>
+</div>
+{% block conteudo %}
+{% endblock %}
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
