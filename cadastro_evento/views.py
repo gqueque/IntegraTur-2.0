@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from rest_framework import viewsets
 from .models import Evento
 from .serializers import EventoSerializer
+import json
 
 class EventoViewSet(viewsets.ModelViewSet):
     queryset = Evento.objects.all()
@@ -28,7 +30,13 @@ def eventos(request):
         estruturas = request.POST.get('estruturas')
         imagem = request.FILES.get('imagem')
 
-        import json
+        # Requisitos adicionais
+        alvara = 'alvara' in request.POST
+        licenca_bombeiros = 'licenca_bombeiros' in request.POST
+        autorizacao_sonora = 'autorizacao_sonora' in request.POST
+        seguranca = request.POST.get('seguranca')
+
+        # Programação em JSON
         try:
             programacao_json = json.loads(programacao) if programacao else []
         except json.JSONDecodeError:
@@ -50,12 +58,17 @@ def eventos(request):
             contratacoes=contratacoes,
             estruturas=estruturas,
             imagem=imagem,
+            alvara=alvara,
+            licenca_bombeiros=licenca_bombeiros,
+            autorizacao_sonora=autorizacao_sonora,
+            seguranca=seguranca,
         )
 
-        return redirect('cadastro_evento')  
+        messages.success(request, f"Evento '{titulo}' cadastrado com sucesso!")
+        return redirect('cadastro_evento')
 
     return redirect('cadastro_evento')
-def home(request):
-    eventos = Evento.objects.all().order_by('-data')  # busca todos, ordena por data
-    return render(request, 'cadastro_evento/home.html', {'eventos': eventos})
 
+def home(request):
+    eventos = Evento.objects.all().order_by('-data')
+    return render(request, 'cadastro_evento/home.html', {'eventos': eventos})
