@@ -1,20 +1,27 @@
 {% extends "cadastro_evento/base.html" %}
 {%block conteudo%}
 
-
-  <!-- Conteúdo -->
-  <div class="content">
-    <div class="filtro mb-4">
-      <h5>Filtrar por categoria</h5>
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" value="" id="cultura">
-        <label class="form-check-label" for="cultura">Secretaria de Cultura</label>
+    <!-- Conteúdo -->
+    <div class="content">
+      <div class="filtro_and_search">
+        <div class="filtro mb-4">
+          <h5>Filtrar por categoria</h5>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="cultura">
+            <label class="form-check-label" for="cultura">Secretaria de Cultura</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="turismo">
+            <label class="form-check-label" for="turismo">Secretaria de Turismo</label>
+          </div>
+        </div>
+        
+        <!-- Barra de busca -->
+        <div class="search-oficial">
+          <input class="search-input" name="pesquisar-evento" type="text" placeholder="Pesquisar por eventos 🔎"> 
+        </div>
       </div>
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" value="" id="turismo">
-        <label class="form-check-label" for="turismo">Secretaria de Turismo</label>
-      </div>
-    </div>
+    
   
     {% for evento in eventos %}
       <div class="card mb-4 shadow-sm p-3 rounded d-flex" style="border: 1px solid #ccc;">
@@ -33,6 +40,6 @@
     {% empty %}
       <p>Nenhum evento encontrado.</p>
     {% endfor %}
-  </div>
+    </div>
   
 {% endblock %}
