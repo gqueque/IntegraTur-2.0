@@ -1,8 +1,17 @@
 from django.db import models
 
 class Evento(models.Model): 
+    RESPONSAVEL_CHOICES = [
+        ('Secretaria de Turismo', 'Secretaria de Turismo'),
+        ('Secretaria de Cultura', 'Secretaria de Cultura'),
+    ]
+
     titulo = models.CharField(max_length=200, verbose_name="Título")
-    responsavel = models.CharField(max_length=100, verbose_name="Responsável")
+    responsavel = models.CharField(
+        max_length=100,
+        choices=RESPONSAVEL_CHOICES,
+        verbose_name="Responsável"
+    )
     local = models.CharField(max_length=200)  
     descricao = models.TextField(verbose_name="Descrição")
     data = models.DateField()  
