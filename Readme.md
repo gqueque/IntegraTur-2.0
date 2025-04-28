@@ -446,14 +446,14 @@ Produzir histórias, storyboards e sketches para atender os 15 entregáveis do "
 
 ## Cadastrar Eventos
 ![Diagrama UML de atividades- Cadastro de eventos](./assets/UMLA_CADASTRAR%20EVENTOS.jpeg)
-**Screencast Cadastro de eventos:** https://youtu.be/CtRIo2G_OgA
+([**Screencast Cadastro de eventos**](https://youtu.be/CtRIo2G_OgA))
 
 ## Filtrar eventos na home
 ![Diagrama UML de atividades- Filtro de eventos](./assets/UMLA_FILTRAR%20EVENTOS.jpeg)
-**Screencast Filtro de eventos:** [text](https://youtu.be/uuCDVuvwn1Y)
+[**Screencast Filtro de eventos**](https://youtu.be/uuCDVuvwn1Y)
 
 ## Mapa de eventos
 ![Diagrama UML de atividades- Mapa de eventos](./assets/UMLA_MAPA%20DE%20EVENTOS.jpeg)
-**Screencast Mapa de eventos:** [text](https://youtu.be/XLAc2zncauc)
+[**Screencast Mapa de eventos**](https://youtu.be/XLAc2zncauc)
 
 --- 
