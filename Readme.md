@@ -444,9 +444,15 @@ Produzir histórias, storyboards e sketches para atender os 15 entregáveis do "
 
 ![Backlog jira](./assets/BACKLOG%20sprint%201%20.png)
 
+## Turorial de acesso
+ [**Link de acesso ao vídeo**](https://youtu.be/FgbxbqstItg)
+
+## Turorial de acesso via GitHub desktop
+  [**Link de acesso ao vídeo**](https://youtu.be/zNFhhK8dlGk)
+  
 ## Cadastrar Eventos
 ![Diagrama UML de atividades- Cadastro de eventos](./assets/UMLA_CADASTRAR%20EVENTOS.jpeg)
-([**Screencast Cadastro de eventos**](https://youtu.be/CtRIo2G_OgA))
+[**Screencast Cadastro de eventos**](https://youtu.be/CtRIo2G_OgA)
 
 ## Filtrar eventos na home
 ![Diagrama UML de atividades- Filtro de eventos](./assets/UMLA_FILTRAR%20EVENTOS.jpeg)
@@ -455,5 +461,7 @@ Produzir histórias, storyboards e sketches para atender os 15 entregáveis do "
 ## Mapa de eventos
 ![Diagrama UML de atividades- Mapa de eventos](./assets/UMLA_MAPA%20DE%20EVENTOS.jpeg)
 [**Screencast Mapa de eventos**](https://youtu.be/XLAc2zncauc)
+
+
 
 --- 
