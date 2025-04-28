@@ -462,6 +462,10 @@ Produzir histórias, storyboards e sketches para atender os 15 entregáveis do "
 ![Diagrama UML de atividades- Mapa de eventos](./assets/UMLA_MAPA%20DE%20EVENTOS.jpeg)
 [**Screencast Mapa de eventos**](https://youtu.be/XLAc2zncauc)
 
+## Programação em par
+[Link para o documento](https://docs.google.com/document/d/11vEEBCyCMGivAvvKpYkM6hbMENi0_XdtMxcJx2nUV-g/edit?usp=sharing)
+
+
 
 
 --- 
