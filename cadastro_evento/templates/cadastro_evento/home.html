@@ -28,8 +28,8 @@
   <!-- Cards de eventos -->
   {% for evento in eventos %}
     <div class="card mb-4 shadow-sm p-4 rounded-4 evento-card" 
-         data-categoria="{{ evento.secretaria }}" 
-         style="border: 1px solid #696969; border-radius: 1rem;">
+      data-categoria="{{ evento.responsavel }}"
+      style="border: 1px solid #696969; border-radius: 1rem;">
       <div class="d-flex align-items-center">
         {% if evento.imagem %}
           <img src="{{ evento.imagem.url }}" alt="Imagem do Evento" 
