@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect
 from rest_framework import viewsets
 from .models import Evento
 from .serializers import EventoSerializer
+import json
+from django.core.serializers.json import DjangoJSONEncoder
+from django.contrib import messages
 
 class EventoViewSet(viewsets.ModelViewSet):
     queryset = Evento.objects.all()
@@ -27,7 +30,10 @@ def eventos(request):
         contratacoes = request.POST.get('contratacoes')
         estruturas = request.POST.get('estruturas')
         imagem = request.FILES.get('imagem')
-
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
+        
+        
         import json
         try:
             programacao_json = json.loads(programacao) if programacao else []
@@ -50,12 +56,34 @@ def eventos(request):
             contratacoes=contratacoes,
             estruturas=estruturas,
             imagem=imagem,
+            latitude=latitude,
+            longitude=longitude,
+
         )
 
-        return redirect('cadastro_evento')  
+        
+        messages.success(request, 'Evento cadastrado com sucesso!')
+        return redirect('home')
+    return redirect('cadastro')  
 
-    return redirect('cadastro_evento')
 def home(request):
     eventos = Evento.objects.all().order_by('-data')  # busca todos, ordena por data
     return render(request, 'cadastro_evento/home.html', {'eventos': eventos})
+
+def mapa(request):
+    eventos = Evento.objects.all()
+    eventos_list = []
+    
+    for evento in eventos:
+        eventos_list.append({
+            'titulo': evento.titulo,
+            'latitude': evento.latitude,
+            'longitude': evento.longitude,
+        })
+
+    eventos_json = json.dumps(eventos_list, cls=DjangoJSONEncoder)
+
+    return render(request, 'cadastro_evento/mapa.html', {'eventos_json': eventos_json})
+
+
 

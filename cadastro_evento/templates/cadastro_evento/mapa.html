@@ -1,0 +1,36 @@
+{% extends "cadastro_evento/base.html" %}
+{% load static %}
+
+{% block conteudo %}
+<div class="content" style="padding: 0;">
+    <div id="map" style="width: 100vw; height: 100vh; margin: 0; padding: 0;"></div>
+</div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdV3seSOOBkqraltqD7TTh4U3FGC3pEC0&callback=inicializarMapa" async defer></script>
+
+<script>
+    let mapa;
+
+    function inicializarMapa() {
+        mapa = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: -8.0476, lng: -34.8770 }, // Recife centro
+            zoom: 12
+        });
+
+        // Dados dos eventos vindos do Django (variável passada pela view)
+        const eventos = {{ eventos_json|safe }};
+
+        // Loop para adicionar um marcador para cada evento
+        eventos.forEach(evento => {
+            if (evento.latitude && evento.longitude) {
+                new google.maps.Marker({
+                    position: { lat: parseFloat(evento.latitude), lng: parseFloat(evento.longitude) },
+                    map: mapa,
+                    title: evento.titulo
+                });
+            }
+        });
+    }
+</script>
+
+{% endblock %}

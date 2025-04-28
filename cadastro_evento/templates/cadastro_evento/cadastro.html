@@ -1,108 +1,188 @@
 {% extends "cadastro_evento/base.html" %}
 {%block conteudo%}
   <div class="content">
-    <h2 class="text-center mb-4">Novo Evento</h2>
+    <h2 class=" mb-4">Novo Evento</h2>
 
-    <form action="{% url 'listagem_evento' %}" method="post">
+    <form action="{% url 'listagem_evento' %}" method="post" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="row">
+    
         <!-- Coluna esquerda -->
         <div class="col-md-6">
           <div class="card form-section mb-3">
             <h5>Informações Básicas</h5>
+    
             <div class="mb-2">
               <label class="form-label">Título</label>
-              <input name="titulo" type="text" class="form-control form-control-sm">
+              <input name="titulo" type="text" class="form-control form-control-sm" placeholder="Digite o nome do evento" required>
             </div>
+    
             <div class="mb-2">
               <label class="form-label">Responsável</label>
-              <select name="responsavel" class="form-select form-select-sm">
+              <select name="responsavel" class="form-select form-select-sm" required>
                 <option value="">Selecione</option>
                 <option value="Secretaria de Turismo">Secretaria de Turismo</option>
                 <option value="Secretaria de Cultura">Secretaria de Cultura</option>
               </select>
-                          
             </div>
+    
             <div class="mb-2">
               <label class="form-label">Local</label>
-              <input name="local" type="text" class="form-control form-control-sm">
+              <input id="autocomplete" name="local" type="text" class="form-control form-control-sm" placeholder="Digite o endereço" required>
+              <input type="hidden" id="latitude" name="latitude">
+              <input type="hidden" id="longitude" name="longitude">
             </div>
+    
             <div class="mb-2">
               <label class="form-label">Descrição</label>
-              <textarea name="descricao" class="form-control form-control-sm" rows="2"></textarea>
+              <textarea name="descricao" class="form-control form-control-sm" placeholder="Descreva o conteúdo do seu evento" rows="2"></textarea>
             </div>
+    
             <div class="mb-2">
               <label class="form-label">Data</label>
-              <input name="data" type="date" class="form-control form-control-sm">
+              <input name="data" type="date" class="form-control form-control-sm" required>
             </div>
+    
             <div class="mb-2">
               <label class="form-label">Atrações</label>
-              <input name="atracoes" type="text" class="form-control form-control-sm">
+              <input name="atracoes" type="text" class="form-control form-control-sm" placeholder="Atrações do evento">
             </div>
+    
             <div class="mb-2">
               <label class="form-label">Orçamento Estimado</label>
-              <input name="orcamento_estimado" type="number" class="form-control form-control-sm">
+              
+              <!-- Campo que o usuário vê -->
+              <input 
+                id="orcamento_mascara" 
+                type="text" 
+                class="form-control form-control-sm" 
+                placeholder="R$ 0,00"
+                maxlength="15">
+              
+              <!-- Campo escondido que será enviado -->
+              <input 
+                id="orcamento_real" 
+                name="orcamento_estimado" 
+                type="hidden">
             </div>
+            
+            <script>
+              document.getElementById('orcamento_mascara').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, ''); // pega só os dígitos
+                
+                // Corrige o caso de ficar 0 inicial
+                value = value.replace(/^0+/, '');
+                
+                if (value.length < 3) {
+                  value = value.padStart(3, '0'); // mínimo 3 dígitos: 0,00
+                }
+              
+                let integer = value.slice(0, -2);
+                let decimal = value.slice(-2);
+                
+                let formatted = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + decimal;
+                
+                e.target.value = 'R$ ' + formatted;
+              
+                // Atualiza o campo oculto sem máscara para enviar ao Django
+                let real = (parseInt(value) / 100).toFixed(2);
+                document.getElementById('orcamento_real').value = real;
+              });
+              </script>
+    
             <div class="mb-2">
               <label class="form-label">Programação</label>
-              <textarea name="programacao" class="form-control form-control-sm" rows="2" placeholder="Ex: ['Abertura', 'Show', 'Encerramento']"></textarea>
+              <textarea name="programacao" class="form-control form-control-sm" rows="2" placeholder="Liste a programação"></textarea>
             </div>
+    
             <div class="mb-3">
               <label class="form-label">Imagem do Evento</label>
               <input name="imagem" type="file" class="form-control">
             </div>
-          </div>
+          </div> <!-- Fecha primeira coluna -->
         </div>
-
-        <!-- Coluna direita -->
+    
+        <!-- Coluna direita (depois da imagem) -->
         <div class="col-md-6">
           <div class="card form-section mb-3">
             <h5>Recursos</h5>
+    
             <div class="mb-2">
               <label class="form-label">Equipamento</label>
               <textarea name="equipamento" class="form-control form-control-sm" rows="2"></textarea>
             </div>
+    
             <div class="mb-2">
               <label class="form-label">Fornecedores</label>
               <textarea name="fornecedores" class="form-control form-control-sm" rows="2"></textarea>
             </div>
+    
             <div class="mb-2">
               <label class="form-label">Patrocinadores</label>
               <textarea name="patrocinadores" class="form-control form-control-sm" rows="2"></textarea>
             </div>
           </div>
-
+    
           <div class="card form-section mb-3">
             <h5>Requisitos</h5>
+    
             <div class="form-check">
               <input class="form-check-input" type="checkbox" name="alvara" id="alvara">
               <label class="form-check-label" for="alvara">Alvará</label>
             </div>
+    
             <div class="form-check">
               <input class="form-check-input" type="checkbox" name="licenca_bombeiros" id="licenca_bombeiros">
               <label class="form-check-label" for="licenca_bombeiros">Licença Bombeiros</label>
             </div>
+    
             <div class="form-check">
               <input class="form-check-input" type="checkbox" name="autorizacao_sonora" id="autorizacao_sonora">
               <label class="form-check-label" for="autorizacao_sonora">Autorização Sonora</label>
             </div>
           </div>
-
+    
           <div class="card form-section mb-3">
             <h5>Outros</h5>
+    
             <div class="mb-2">
               <label class="form-label">Segurança</label>
               <input name="seguranca" type="text" class="form-control form-control-sm">
             </div>
+    
             <div class="mb-2">
               <label class="form-label">Marketing</label>
               <input name="marketing" type="text" class="form-control form-control-sm">
             </div>
           </div>
         </div>
-      </div>
-
+    
+      </div> <!-- fecha row -->
+      
       <button type="submit" class="btn btn-primary btn-save">Salvar</button>
+    </form>
+    
+      <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdV3seSOOBkqraltqD7TTh4U3FGC3pEC0&libraries=places&callback=initAutocomplete"
+    async defer>
+    </script>
+
+<script>
+  function initAutocomplete() {
+    const input = document.getElementById('autocomplete');
+    const autocomplete = new google.maps.places.Autocomplete(input);
+
+    autocomplete.addListener('place_changed', function() {
+      const place = autocomplete.getPlace();
+      if (place.geometry) {
+        document.getElementById('latitude').value = place.geometry.location.lat();
+        document.getElementById('longitude').value = place.geometry.location.lng();
+      }
+    });
+  }
+</script>
+
+      
     </form>
   </div>
 {% endblock %}

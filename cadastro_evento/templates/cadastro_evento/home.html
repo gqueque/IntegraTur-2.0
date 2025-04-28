@@ -52,4 +52,18 @@
 <!-- Importa o JavaScript -->
 <script src="{% static 'js/filtroEventos.js' %}"></script>
 
+{% if messages %}
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    {% for message in messages %}
+      Swal.fire({
+        title: 'Sucesso!',
+        text: '{{ message }}',
+        icon: 'success',
+        timer: 2500,
+        showConfirmButton: false
+      });
+    {% endfor %}
+  </script>
+{% endif %}
 {% endblock %}

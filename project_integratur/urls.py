@@ -17,9 +17,12 @@ urlpatterns = [
     #cadastro_evento
     path('cadastro', views.cadastro_evento, name='cadastro'),
     #cadastro_evento/eventos
-    path("eventos/", views.eventos, name="listagem_evento"),
+    path('eventos/', views.eventos, name='listagem_evento'),
     path('home', views.home, name='home'),
     path('', views.home, name='home_redirect'),
+    path('mapa/', views.mapa, name='mapa'),
+
+    
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

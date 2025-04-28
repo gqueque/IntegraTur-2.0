@@ -17,7 +17,7 @@ class Evento(models.Model):
     data = models.DateField()  
     marketing = models.TextField(blank=True, null=True, verbose_name="Estratégia de Marketing")
     orcamento_estimado = models.DecimalField( 
-        max_digits=10,
+        max_digits=14,
         decimal_places=2,
         blank=True,
         null=True,
@@ -46,6 +46,12 @@ class Evento(models.Model):
         null=True,
         verbose_name='Imagem do Evento'
     )
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
+    local = models.CharField(max_length=200)
+
 
     def __str__(self):  
         return self.titulo
+    
+
