@@ -442,6 +442,15 @@ Produzir histórias, storyboards e sketches para atender os 15 entregáveis do "
 | Storyboard  | Calendário de Eventos               | ✅         |
 | Storyboard  | Mapa de Eventos                     | ✅         |
 
-![Backlog jiro](./assets/BACKLOG%20sprint%201%20.png)
+![Backlog jira](./assets/BACKLOG%20sprint%201%20.png)
+
+## Cadastrar Eventos
+![Diagrama UML de atividades- Cadastro de eventos](./assets/UMLA_CADASTRAR%20EVENTOS.jpeg)
+**Screencast Cadastro de eventos:** https://youtu.be/CtRIo2G_OgA
+
+
+
+
+
 
 --- 
