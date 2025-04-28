@@ -465,6 +465,11 @@ Produzir histórias, storyboards e sketches para atender os 15 entregáveis do "
 ## Programação em par
 [Link para o documento](https://docs.google.com/document/d/11vEEBCyCMGivAvvKpYkM6hbMENi0_XdtMxcJx2nUV-g/edit?usp=sharing)
 
+### **Backlog de tarefas Sprint 1**
+![Backlog de tarefas Sprint 1](./assets/BACKLOG%20sprint%202%20.png)
+
+
+
 
 
 
