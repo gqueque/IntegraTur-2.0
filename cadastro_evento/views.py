@@ -5,6 +5,8 @@ from .serializers import EventoSerializer
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib import messages
+from datetime import datetime
+
 
 class EventoViewSet(viewsets.ModelViewSet):
     queryset = Evento.objects.all()
@@ -67,8 +69,45 @@ def eventos(request):
     return redirect('cadastro')  
 
 def home(request):
-    eventos = Evento.objects.all().order_by('-data')  # busca todos, ordena por data
-    return render(request, 'cadastro_evento/home.html', {'eventos': eventos})
+    query = request.GET.get('q', '')
+    data_inicial = request.GET.get('data_inicial', '')
+    data_final = request.GET.get('data_final', '')
+    eventos = Evento.objects.all()
+
+    if query:
+        eventos = eventos.filter(titulo__icontains=query)
+
+    if data_inicial and data_final:
+        try:
+            data_ini = datetime.strptime(data_inicial, '%Y-%m-%d').date()
+            data_fim = datetime.strptime(data_final, '%Y-%m-%d').date()
+            eventos = eventos.filter(data__range=(data_ini, data_fim))
+        except ValueError:
+            pass  # ignora erro se datas forem inválidas
+
+    elif data_inicial:  # só data inicial
+        try:
+            data_ini = datetime.strptime(data_inicial, '%Y-%m-%d').date()
+            eventos = eventos.filter(data__gte=data_ini)
+        except ValueError:
+            pass
+
+    elif data_final:  # só data final
+        try:
+            data_fim = datetime.strptime(data_final, '%Y-%m-%d').date()
+            eventos = eventos.filter(data__lte=data_fim)
+        except ValueError:
+            pass
+
+    eventos = eventos.order_by('-data')
+    return render(request, 'cadastro_evento/home.html', {
+        'eventos': eventos,
+        'query': query,
+        'data_inicial': data_inicial,
+        'data_final': data_final
+    })
+
+    
 
 def mapa(request):
     eventos = Evento.objects.all()

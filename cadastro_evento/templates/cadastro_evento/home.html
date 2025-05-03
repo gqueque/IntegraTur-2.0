@@ -21,7 +21,31 @@
 
     <!-- Barra de busca -->
     <div class="search-oficial">
-      <input class="search-input form-control" name="pesquisar-evento" type="text" placeholder="Pesquisar por eventos 🔎">
+      <form method="get" action="{% url 'home' %}" class="d-flex" style="gap: 10px;">
+        <input 
+        type="text" 
+        name="q" 
+        placeholder="Pesquisar por nome..." 
+        value="{{ request.GET.q }}" 
+        class="form-control"
+    >
+
+        <input 
+            type="date" 
+            name="data_inicial" 
+            value="{{ request.GET.data_inicial }}" 
+            class="form-control"
+        >
+
+        <input 
+            type="date" 
+            name="data_final" 
+            value="{{ request.GET.data_final }}" 
+            class="form-control"
+        >
+        <button type="submit" class="btn btn-primary">🔍</button>
+        <a href="{% url 'home' %}" class="btn btn-secondary">🧹 Limpar</a>
+    </form>
     </div>
   </div>
 
@@ -64,6 +88,9 @@
         showConfirmButton: false
       });
     {% endfor %}
+    {% if not eventos %}
+    <p>Nenhum evento encontrado para "{{ query }}"</p>
+    {% endif %}
   </script>
 {% endif %}
 {% endblock %}
