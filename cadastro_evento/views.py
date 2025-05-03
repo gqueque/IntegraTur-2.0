@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from unidecode import unidecode
 from rest_framework import viewsets
 from .models import Evento
 from .serializers import EventoSerializer
@@ -72,40 +73,45 @@ def home(request):
     query = request.GET.get('q', '')
     data_inicial = request.GET.get('data_inicial', '')
     data_final = request.GET.get('data_final', '')
-    eventos = Evento.objects.all()
 
-    if query:
-        eventos = eventos.filter(titulo__icontains=query)
+    eventos_qs = Evento.objects.all().order_by('-data')  # queryset original
 
     if data_inicial and data_final:
         try:
             data_ini = datetime.strptime(data_inicial, '%Y-%m-%d').date()
             data_fim = datetime.strptime(data_final, '%Y-%m-%d').date()
-            eventos = eventos.filter(data__range=(data_ini, data_fim))
+            eventos_qs = eventos_qs.filter(data__range=(data_ini, data_fim))
         except ValueError:
-            pass  # ignora erro se datas forem inválidas
-
-    elif data_inicial:  # só data inicial
+            pass
+    elif data_inicial:
         try:
             data_ini = datetime.strptime(data_inicial, '%Y-%m-%d').date()
-            eventos = eventos.filter(data__gte=data_ini)
+            eventos_qs = eventos_qs.filter(data__gte=data_ini)
         except ValueError:
             pass
-
-    elif data_final:  # só data final
+    elif data_final:
         try:
             data_fim = datetime.strptime(data_final, '%Y-%m-%d').date()
-            eventos = eventos.filter(data__lte=data_fim)
+            eventos_qs = eventos_qs.filter(data__lte=data_fim)
         except ValueError:
             pass
 
-    eventos = eventos.order_by('-data')
+    eventos = list(eventos_qs)  # converte para lista antes da filtragem com unidecode
+
+    if query:
+        query_sem_acentos = unidecode(query).lower()
+        eventos = [
+            evento for evento in eventos
+            if query_sem_acentos in unidecode(evento.titulo or "").lower()
+        ]
+
     return render(request, 'cadastro_evento/home.html', {
         'eventos': eventos,
         'query': query,
         'data_inicial': data_inicial,
         'data_final': data_final
     })
+
 
     
 

@@ -18,45 +18,27 @@
         <label class="form-check-label" for="turismoCheckbox">Secretaria de Turismo</label>
       </div>
     </div>
-
+    
     <!-- Barra de busca -->
     <div class="search-oficial">
       <form method="get" action="{% url 'home' %}" class="d-flex" style="gap: 10px;">
-        <input 
-        type="text" 
-        name="q" 
-        placeholder="Pesquisar por nome..." 
-        value="{{ request.GET.q }}" 
-        class="form-control"
-    >
-
-        <input 
-            type="date" 
-            name="data_inicial" 
-            value="{{ request.GET.data_inicial }}" 
-            class="form-control"
-        >
-
-        <input 
-            type="date" 
-            name="data_final" 
-            value="{{ request.GET.data_final }}" 
-            class="form-control"
-        >
+        <input type="text" name="q" placeholder="Pesquisar por nome..." value="{{ request.GET.q }}" class="form-control">
+        <input type="date" name="data_inicial" value="{{ request.GET.data_inicial }}" class="form-control">
+        <input type="date" name="data_final" value="{{ request.GET.data_final }}" class="form-control">
         <button type="submit" class="btn btn-primary">🔍</button>
         <a href="{% url 'home' %}" class="btn btn-secondary">🧹 Limpar</a>
-    </form>
+      </form>
     </div>
   </div>
 
   <!-- Cards de eventos -->
   {% for evento in eventos %}
-    <div class="card mb-4 shadow-sm p-4 rounded-4 evento-card" 
-      data-categoria="{{ evento.responsavel }}"
-      style="border: 1px solid #696969; border-radius: 1rem;">
+    <div class="card mb-4 shadow-sm p-4 rounded-4 evento-card"
+         data-categoria="{{ evento.responsavel }}"
+         style="border: 1px solid #696969; border-radius: 1rem;">
       <div class="d-flex align-items-center">
         {% if evento.imagem %}
-          <img src="{{ evento.imagem.url }}" alt="Imagem do Evento" 
+          <img src="{{ evento.imagem.url }}" alt="Imagem do Evento"
                style="width: 180px; height: 120px; object-fit: cover; border-radius: 10px;">
         {% endif %}
         <div class="ms-4">
@@ -64,7 +46,19 @@
           <p class="text-muted mb-1">{{ evento.data|date:"d \d\e F \d\e Y" }}</p>
           <p class="mb-2">{{ evento.descricao|truncatechars:120 }}</p>
           <p class="mb-2 text-secondary"><i>Responsável: {{ evento.responsavel }}</i></p>
-          <a href="#" class="btn btn-outline-secondary btn-sm">Saiba Mais</a>
+          <a href="#"
+             class="btn btn-outline-secondary btn-sm"
+             data-bs-toggle="modal"
+             data-bs-target="#eventoModal"
+             onclick="mostrarDetalhes(
+               '{{ evento.titulo|escapejs }}',
+               '{{ evento.descricao|escapejs }}',
+               '{{ evento.data|date:'d/m/Y' }}',
+               '{{ evento.responsavel|escapejs }}',
+               '{% if evento.imagem %}{{ evento.imagem.url }}{% else %}{% static 'images/placeholder.jpg' %}{% endif %}'
+             )">
+             Saiba Mais
+          </a>
         </div>
       </div>
     </div>
@@ -73,7 +67,22 @@
   {% endfor %}
 </div>
 
-<!-- Importa o JavaScript -->
+<!-- Modal -->
+<div class="modal fade" id="eventoModal" tabindex="-1" aria-labelledby="eventoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content p-4" style="min-height: 300px; max-height: 80vh;">
+      <div class="modal-header">
+        <h5 class="modal-title" id="eventoModalLabel">Detalhes do Evento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body" id="modal-body-content">
+        <!-- Conteúdo do evento será inserido aqui -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
 <script src="{% static 'js/filtroEventos.js' %}"></script>
 
 {% if messages %}
@@ -88,9 +97,29 @@
         showConfirmButton: false
       });
     {% endfor %}
-    {% if not eventos %}
-    <p>Nenhum evento encontrado para "{{ query }}"</p>
-    {% endif %}
   </script>
 {% endif %}
+
+<script>
+  function mostrarDetalhes(titulo, descricao, data, responsavel, imagemUrl) {
+    const conteudo = `
+      <div class="row">
+        <div class="col-md-8">
+          <p><strong>Título:</strong> ${titulo}</p>
+          <p><strong>Data:</strong> ${data}</p>
+          <p><strong>Responsável:</strong> ${responsavel}</p>
+          <hr>
+          <p><strong>Descrição:</strong></p>
+          <p>${descricao}</p>
+        </div>
+        <div class="col-md-4 text-center">
+          <img src="${imagemUrl}" alt="Imagem do Evento" style="max-width: 100%; border-radius: 10px;">
+        </div>
+      </div>
+    `;
+    document.getElementById('eventoModalLabel').innerText = titulo;
+    document.getElementById('modal-body-content').innerHTML = conteudo;
+  }
+</script>
+
 {% endblock %}
