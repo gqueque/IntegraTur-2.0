@@ -17,18 +17,54 @@
             zoom: 12
         });
 
-        // Dados dos eventos vindos do Django (variável passada pela view)
         const eventos = {{ eventos_json|safe }};
 
-        // Loop para adicionar um marcador para cada evento
+        const infoWindow = new google.maps.InfoWindow();
+
         eventos.forEach(evento => {
             if (evento.latitude && evento.longitude) {
-                new google.maps.Marker({
+                const marcador = new google.maps.Marker({
                     position: { lat: parseFloat(evento.latitude), lng: parseFloat(evento.longitude) },
                     map: mapa,
                     title: evento.titulo
                 });
+
+                const conteudo = `
+        <div style="
+        background-color: white;
+        padding: 8px;
+        border-radius: 6px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        max-width: 200px;
+        font-family: Arial, sans-serif;
+    ">
+        <img src="${evento.imagem}" alt="${evento.nome}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 4px; margin-bottom: 6px;">
+        <h3 style="margin: 0; font-size: 14px;">${evento.nome}</h3>
+        <p style="margin: 4px 0; font-size: 12px;"><strong>Data:</strong> ${evento.data}</p>
+        <button onclick="window.location.href='/eventos/${evento.id}'" style="
+            background-color: black;
+            color: white;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        ">+Detalhes</button>
+    </div>
+    `;
+
+    
+
+
+                marcador.addListener('click', () => {
+                    infoWindow.setContent(conteudo);
+                    infoWindow.open(mapa, marcador);
+                });
             }
+        });
+
+        mapa.addListener('click', () => {
+            infoWindow.close();
         });
     }
 </script>

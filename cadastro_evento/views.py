@@ -120,11 +120,16 @@ def mapa(request):
     eventos_list = []
     
     for evento in eventos:
-        eventos_list.append({
-            'titulo': evento.titulo,
+            eventos_list.append({
+            'id': evento.id,
+            'nome': evento.titulo,
+            'descricao': evento.descricao,
+            'data': evento.data.strftime('%d/%m/%Y'),
             'latitude': evento.latitude,
             'longitude': evento.longitude,
+            'imagem': evento.imagem.url if evento.imagem else '',
         })
+
 
     eventos_json = json.dumps(eventos_list, cls=DjangoJSONEncoder)
 
