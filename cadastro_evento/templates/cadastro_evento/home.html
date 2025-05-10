@@ -3,10 +3,8 @@
 
 {% block conteudo %}
 
-<!-- Conteúdo -->
 <div class="content">
   <div class="filtro_and_search mb-4 d-flex justify-content-between align-items-center">
-    <!-- Filtro -->
     <div class="filtro">
       <h5>Filtrar por secretaria</h5>
       <div class="form-check">
@@ -18,8 +16,7 @@
         <label class="form-check-label" for="turismoCheckbox">Secretaria de Turismo</label>
       </div>
     </div>
-    
-    <!-- Barra de busca -->
+
     <div class="search-oficial">
       <form method="get" action="{% url 'home' %}" class="d-flex" style="gap: 10px;">
         <input type="text" name="q" placeholder="Pesquisar por nome..." value="{{ request.GET.q }}" class="form-control">
@@ -31,40 +28,54 @@
     </div>
   </div>
 
-  <!-- Cards de eventos -->
   {% for evento in eventos %}
-    <div class="card mb-4 shadow-sm p-4 rounded-4 evento-card"
-         data-categoria="{{ evento.responsavel }}"
-         style="border: 1px solid #696969; border-radius: 1rem;">
-      <div class="d-flex align-items-center">
-        {% if evento.imagem %}
-          <img src="{{ evento.imagem.url }}" alt="Imagem do Evento"
-               style="width: 180px; height: 120px; object-fit: cover; border-radius: 10px;">
-        {% endif %}
-        <div class="ms-4">
-          <h5>{{ evento.titulo }}</h5>
-          <p class="text-muted mb-1">{{ evento.data|date:"d \d\e F \d\e Y" }}</p>
-          <p class="mb-2">{{ evento.descricao|truncatechars:120 }}</p>
-          <p class="mb-2 text-secondary"><i>Responsável: {{ evento.responsavel }}</i></p>
-          <a href="#"
-             class="btn btn-outline-secondary btn-sm"
-             data-bs-toggle="modal"
-             data-bs-target="#eventoModal"
-             onclick="mostrarDetalhes(
-               '{{ evento.titulo|escapejs }}',
-               '{{ evento.descricao|escapejs }}',
-               '{{ evento.data|date:'d/m/Y' }}',
-               '{{ evento.responsavel|escapejs }}',
-               '{% if evento.imagem %}{{ evento.imagem.url }}{% else %}{% static 'images/placeholder.jpg' %}{% endif %}'
-             )">
-             Saiba Mais
-          </a>
-        </div>
-      </div>
+  <div class="card mb-4 shadow-sm p-4 rounded-4 evento-card position-relative"
+     data-categoria="{{ evento.responsavel }}"
+     style="border: 1px solid #696969; border-radius: 1rem;">
+  
+  <!-- Botões fixos no canto superior direito -->
+  <div style="position: absolute; top: 16px; right: 16px;" class="d-flex gap-2">
+    <a href="{% url 'editar_evento' evento.id %}" class="btn btn-sm btn-warning p-1" title="Editar">✏️</a>
+    <form action="{% url 'excluir_evento' evento.id %}" method="post" style="margin: 0;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-sm btn-danger p-1" title="Excluir"
+              onclick="return confirm('Tem certeza que deseja excluir este evento?')">🗑️</button>
+    </form>
+  </div>
+
+  <!-- Conteúdo do card -->
+  <div class="d-flex align-items-start">
+    {% if evento.imagem %}
+      <img src="{{ evento.imagem.url }}" alt="Imagem do Evento"
+           style="width: 180px; height: 120px; object-fit: cover; border-radius: 10px;">
+    {% endif %}
+
+    <div class="ms-4">
+      <h5>{{ evento.titulo }}</h5>
+      <p class="text-muted mb-1">{{ evento.data|date:"d \d\e F \d\e Y" }}</p>
+      <p class="mb-2">{{ evento.descricao|truncatechars:120 }}</p>
+      <p class="mb-2 text-secondary"><i>Responsável: {{ evento.responsavel }}</i></p>
+      <a href="#"
+         class="btn btn-outline-secondary btn-sm"
+         data-bs-toggle="modal"
+         data-bs-target="#eventoModal"
+         onclick="mostrarDetalhes(
+           '{{ evento.titulo|escapejs }}',
+           '{{ evento.descricao|escapejs }}',
+           '{{ evento.data|date:'d/m/Y' }}',
+           '{{ evento.responsavel|escapejs }}',
+           '{% if evento.imagem %}{{ evento.imagem.url }}{% else %}{% static 'images/placeholder.jpg' %}{% endif %}'
+         )">
+         Saiba Mais
+      </a>
     </div>
-  {% empty %}
-    <p>Nenhum evento encontrado.</p>
-  {% endfor %}
+  </div>
+</div>
+
+{% empty %}
+  <p>Nenhum evento encontrado.</p>
+{% endfor %}
+
 </div>
 
 <!-- Modal -->
@@ -76,13 +87,12 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
       </div>
       <div class="modal-body" id="modal-body-content">
-        <!-- Conteúdo do evento será inserido aqui -->
+        <!-- Conteúdo dinâmico será inserido aqui -->
       </div>
     </div>
   </div>
 </div>
 
-<!-- Scripts -->
 <script src="{% static 'js/filtroEventos.js' %}"></script>
 
 {% if messages %}

@@ -1,4 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from unidecode import unidecode
 from rest_framework import viewsets
 from .models import Evento
@@ -7,7 +9,6 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib import messages
 from datetime import datetime
-
 
 class EventoViewSet(viewsets.ModelViewSet):
     queryset = Evento.objects.all()
@@ -35,9 +36,7 @@ def eventos(request):
         imagem = request.FILES.get('imagem')
         latitude = request.POST.get('latitude')
         longitude = request.POST.get('longitude')
-        
-        
-        import json
+
         try:
             programacao_json = json.loads(programacao) if programacao else []
         except json.JSONDecodeError:
@@ -61,20 +60,18 @@ def eventos(request):
             imagem=imagem,
             latitude=latitude,
             longitude=longitude,
-
         )
 
-        
         messages.success(request, 'Evento cadastrado com sucesso!')
         return redirect('home')
-    return redirect('cadastro')  
+    return redirect('cadastro')
 
 def home(request):
     query = request.GET.get('q', '')
     data_inicial = request.GET.get('data_inicial', '')
     data_final = request.GET.get('data_final', '')
 
-    eventos_qs = Evento.objects.all().order_by('-data')  # queryset original
+    eventos_qs = Evento.objects.all().order_by('-data')
 
     if data_inicial and data_final:
         try:
@@ -96,7 +93,7 @@ def home(request):
         except ValueError:
             pass
 
-    eventos = list(eventos_qs)  # converte para lista antes da filtragem com unidecode
+    eventos = list(eventos_qs)
 
     if query:
         query_sem_acentos = unidecode(query).lower()
@@ -112,15 +109,11 @@ def home(request):
         'data_final': data_final
     })
 
-
-    
-
 def mapa(request):
     eventos = Evento.objects.all()
     eventos_list = []
-    
     for evento in eventos:
-            eventos_list.append({
+        eventos_list.append({
             'id': evento.id,
             'nome': evento.titulo,
             'descricao': evento.descricao,
@@ -129,11 +122,47 @@ def mapa(request):
             'longitude': evento.longitude,
             'imagem': evento.imagem.url if evento.imagem else '',
         })
-
-
     eventos_json = json.dumps(eventos_list, cls=DjangoJSONEncoder)
-
     return render(request, 'cadastro_evento/mapa.html', {'eventos_json': eventos_json})
 
+def editar_evento(request, id):
+    evento = get_object_or_404(Evento, id=id)
+    if request.method == 'POST':
+        evento.titulo = request.POST.get('titulo')
+        evento.responsavel = request.POST.get('responsavel')
+        evento.local = request.POST.get('local')
+        evento.descricao = request.POST.get('descricao')
+        evento.data = request.POST.get('data')
+        evento.marketing = request.POST.get('marketing')
+        evento.orcamento_estimado = request.POST.get('orcamento_estimado') or None
+        evento.programacao = request.POST.get('programacao')
+        evento.equipamento = request.POST.get('equipamento')
+        evento.fornecedores = request.POST.get('fornecedores')
+        evento.patrocinadores = request.POST.get('patrocinadores')
+        evento.alinhamento_orgao_controle = request.POST.get('alinhamento_orgao_controle')
+        evento.contratacoes = request.POST.get('contratacoes')
+        evento.estruturas = request.POST.get('estruturas')
+        evento.latitude = request.POST.get('latitude')
+        evento.longitude = request.POST.get('longitude')
 
+        if request.FILES.get('imagem'):
+            evento.imagem = request.FILES.get('imagem')
 
+        try:
+            evento.programacao = json.loads(evento.programacao or '[]')
+        except json.JSONDecodeError:
+            evento.programacao = []
+
+        evento.save()
+        messages.success(request, 'Evento atualizado com sucesso!')
+        return redirect('home')
+
+    return render(request, 'cadastro_evento/editar.html', {'evento': evento})
+
+def excluir_evento(request, id):
+    evento = get_object_or_404(Evento, id=id)
+    if request.method == 'POST':
+        evento.delete()
+        messages.success(request, 'Evento excluído com sucesso!')
+        return redirect('home')
+    return render(request, 'cadastro_evento/excluir_confirmacao.html', {'evento': evento})
