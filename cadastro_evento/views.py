@@ -127,6 +127,7 @@ def mapa(request):
 
 def editar_evento(request, id):
     evento = get_object_or_404(Evento, id=id)
+
     if request.method == 'POST':
         evento.titulo = request.POST.get('titulo')
         evento.responsavel = request.POST.get('responsavel')
@@ -134,16 +135,27 @@ def editar_evento(request, id):
         evento.descricao = request.POST.get('descricao')
         evento.data = request.POST.get('data')
         evento.marketing = request.POST.get('marketing')
-        evento.orcamento_estimado = request.POST.get('orcamento_estimado') or None
-        evento.programacao = request.POST.get('programacao')
+
+        # Corrige orçamento com vírgula
+        orcamento_str = request.POST.get('orcamento_estimado') or "0"
+        try:
+            evento.orcamento_estimado = float(orcamento_str.replace('.', '').replace(',', '.'))
+        except ValueError:
+            evento.orcamento_estimado = 0.0
+
+        evento.programacao = request.POST.get('programacao') or ""
         evento.equipamento = request.POST.get('equipamento')
         evento.fornecedores = request.POST.get('fornecedores')
         evento.patrocinadores = request.POST.get('patrocinadores')
         evento.alinhamento_orgao_controle = request.POST.get('alinhamento_orgao_controle')
         evento.contratacoes = request.POST.get('contratacoes')
         evento.estruturas = request.POST.get('estruturas')
-        evento.latitude = request.POST.get('latitude')
-        evento.longitude = request.POST.get('longitude')
+
+        # Latitude e longitude como float
+        lat = request.POST.get('latitude')
+        lon = request.POST.get('longitude')
+        evento.latitude = float(lat.replace(',', '.')) if lat else 0.0
+        evento.longitude = float(lon.replace(',', '.')) if lon else 0.0
 
         if request.FILES.get('imagem'):
             evento.imagem = request.FILES.get('imagem')

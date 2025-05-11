@@ -38,8 +38,11 @@
     <a href="{% url 'editar_evento' evento.id %}" class="btn btn-sm btn-warning p-1" title="Editar">✏️</a>
     <form action="{% url 'excluir_evento' evento.id %}" method="post" style="margin: 0;">
       {% csrf_token %}
-      <button type="submit" class="btn btn-sm btn-danger p-1" title="Excluir"
-              onclick="return confirm('Tem certeza que deseja excluir este evento?')">🗑️</button>
+      <button type="button"
+        class="btn btn-sm btn-danger btn-excluir-evento"
+        data-id="{{ evento.id }}">
+        🗑️ 
+      </button>
     </form>
   </div>
 
@@ -56,18 +59,23 @@
       <p class="mb-2">{{ evento.descricao|truncatechars:120 }}</p>
       <p class="mb-2 text-secondary"><i>Responsável: {{ evento.responsavel }}</i></p>
       <a href="#"
-         class="btn btn-outline-secondary btn-sm"
-         data-bs-toggle="modal"
-         data-bs-target="#eventoModal"
-         onclick="mostrarDetalhes(
-           '{{ evento.titulo|escapejs }}',
-           '{{ evento.descricao|escapejs }}',
-           '{{ evento.data|date:'d/m/Y' }}',
-           '{{ evento.responsavel|escapejs }}',
-           '{% if evento.imagem %}{{ evento.imagem.url }}{% else %}{% static 'images/placeholder.jpg' %}{% endif %}'
-         )">
-         Saiba Mais
-      </a>
+      class="btn btn-outline-secondary btn-sm"
+      data-bs-toggle="modal"
+      data-bs-target="#eventoModal"
+      onclick="mostrarDetalhes(
+        '{{ evento.titulo|escapejs }}',
+        '{{ evento.descricao|escapejs }}',
+        '{{ evento.data|date:"d/m/Y" }}',
+        '{{ evento.responsavel|escapejs }}',
+        '{% if evento.imagem %}{{ evento.imagem.url }}{% else %}{% static "images/placeholder.jpg" %}{% endif %}',
+        '{{ evento.atracoes|default:"-"|escapejs }}',
+        '{{ evento.orcamento_estimado|default:"-" }}',
+        '{{ evento.equipamento|default:"-"|escapejs }}',
+        '{{ evento.fornecedores|default:"-"|escapejs }}',
+        '{{ evento.patrocinadores|default:"-"|escapejs }}'
+      )">
+      Saiba Mais
+    </a>
     </div>
   </div>
 </div>
@@ -131,5 +139,43 @@
     document.getElementById('modal-body-content').innerHTML = conteudo;
   }
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.querySelectorAll('.btn-excluir-evento').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const eventoId = this.getAttribute('data-id');
+
+      Swal.fire({
+        title: 'Tem certeza?',
+        text: 'Esta ação não poderá ser desfeita.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, excluir',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+      }).then(result => {
+        if (result.isConfirmed) {
+          // Cria um form dinamicamente e envia
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = `/excluir/${eventoId}/`;
+
+          const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+          const csrfInput = document.createElement('input');
+          csrfInput.type = 'hidden';
+          csrfInput.name = 'csrfmiddlewaretoken';
+          csrfInput.value = csrfToken;
+
+          form.appendChild(csrfInput);
+          document.body.appendChild(form);
+          form.submit();
+        }
+      });
+    });
+  });
+</script>
+
 
 {% endblock %}
