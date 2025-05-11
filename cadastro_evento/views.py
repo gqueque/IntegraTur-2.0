@@ -166,3 +166,37 @@ def excluir_evento(request, id):
         messages.success(request, 'Evento excluído com sucesso!')
         return redirect('home')
     return render(request, 'cadastro_evento/excluir_confirmacao.html', {'evento': evento})
+
+# Renderiza a página do calendário
+def calendario_view(request):
+    return render(request, 'cadastro_evento/calendario.html')
+
+# Fornece os eventos em JSON para o FullCalendar
+def events_json(request):
+    # Recebe filtros opcionais via query params
+    categoria = request.GET.get('category')
+    localizacao = request.GET.get('location')
+    tipo = request.GET.get('type')
+
+    qs = Evento.objects.all()
+    if categoria:
+        qs = qs.filter(categoria__iexact=categoria)
+    if localizacao:
+        qs = qs.filter(localizacao__icontains=localizacao)
+    if tipo:
+        qs = qs.filter(tipo__iexact=tipo)
+
+    events = [
+        {
+            'id': e.id,
+            'title': e.titulo,
+            'start': e.data.isoformat(),
+            'extendedProps': {
+                'categoria': e.categoria,
+                'localizacao': e.localizacao,
+                'tipo': e.tipo,
+            }
+        }
+        for e in qs
+    ]
+    return JsonResponse(events, safe=False)

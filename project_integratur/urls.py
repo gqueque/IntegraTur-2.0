@@ -23,7 +23,8 @@ urlpatterns = [
     path('mapa/', views.mapa, name='mapa'),
     path('editar/<int:id>/', views.editar_evento, name='editar_evento'),
     path('excluir/<int:id>/', views.excluir_evento, name='excluir_evento'),
-
+    path('calendario/', views.calendario_view, name='calendario'),
+    path('api/events/', views.events_json, name='events_json'),
     
 ]
 if settings.DEBUG:
