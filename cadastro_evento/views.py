@@ -121,6 +121,7 @@ def mapa(request):
             'latitude': evento.latitude,
             'longitude': evento.longitude,
             'imagem': evento.imagem.url if evento.imagem else '',
+            'responsavel': evento.responsavel if evento.responsavel else 'Não informado', #Inserindo a secretaria responsavel do evento para o card expandido
         })
     eventos_json = json.dumps(eventos_list, cls=DjangoJSONEncoder)
     return render(request, 'cadastro_evento/mapa.html', {'eventos_json': eventos_json})
