@@ -37,22 +37,27 @@
                         padding: 8px;
                         border-radius: 6px;
                         box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-                        max-width: 200px;
+                        width: 290px;
+                        height: 270px;
                         font-family: Arial, sans-serif;
                     ">
-                        <img src="${evento.imagem}" alt="${evento.nome}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 4px; margin-bottom: 6px;">
-                        <h3 style="margin: 0; font-size: 14px;">${evento.nome}</h3>
-                        <p style="margin: 4px 0; font-size: 12px;"><strong>Data:</strong> ${evento.data}</p>
+                    <div style="text-align: center;">
+                      <img src="${evento.imagem}" alt="${evento.nome}" style="width: 270px; height: 110px; object-fit: cover; border-radius: 4px; margin-bottom: 6px;">
+                    </div>
+                    <div style="text-align: left;">
+                      <h3 style="margin: 0; font-size: 18px; font-weight: bold; padding-top: 10px; margin-bottom: 5px">${evento.nome}</h3>
+                      <p style="margin: 4px 0; font-size: 15px; padding-top: 5px; margin-bottom: 5px; color: #808080">Data: ${evento.data}</p>
+                    </div>
 
-                        <!-- Botão Saiba mais implementado no lugar do +Detalhes (Agora não mais tão igual ao da home) -->
-
-                        <a
+                    <!-- Botão Saiba mais implementado no lugar do +Detalhes (Agora não mais tão igual ao da home) -->
+                    <div style="text-align: right; padding-top: 10px; margin-bottom: 5px">
+                      <a;
                         id="${botaoId}"
                         class="btn btn-outline-secondary btn-sm"
                         data-bs-toggle="modal"
                         data-bs-target="#eventoModal">
                         Saiba Mais
-                        </a>
+                      </a>
                     </div>
         `;
         marcador.addListener('click', () => {
