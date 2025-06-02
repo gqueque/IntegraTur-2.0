@@ -473,4 +473,13 @@ Produzir histórias, storyboards e sketches para atender os 15 entregáveis do "
 
 ## BACKLOG SPRINT 3
 ![Backlog de tarefas Sprint 3](./assets/BACKLOG%20sprint%203.jpeg)
+
+## Screecast Completo
+[**Screencast Final**](https://www.youtube.com/watch?v=vQPIp2dcMYg)
+
+## Issue/Bug Tracker
+![Backlog dO Issue/Bug Tracker](./assets/ISSUE_BUG%20TRACKER.jpeg)
+
+
+
 --- 
