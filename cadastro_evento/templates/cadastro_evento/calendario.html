@@ -4,12 +4,13 @@
 <div class="content">
   <div id="calendar" style="padding: 1rem;"></div>
 
-  <!-- FullCalendar via CDN -->
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+  <!-- FullCalendar + SweetAlert2 CSS/JS -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
       const calendarEl = document.getElementById('calendar');
 
       const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -22,17 +23,68 @@
         },
         buttonText: {
           today: 'Hoje',
+          month: 'Mês',
+          week: 'Semana',
+          day: 'Dia',
+          list: 'Lista'
         },
-        views: {
-          listMonth: { buttonText: 'lista' },
-          dayGridMonth: { buttonText: 'mês' },
-          timeGridWeek: { buttonText: 'semana' },
-          timeGridDay: { buttonText: 'dia' },
+        events: '{% url "events_json" %}',
+        
+        // Configuração para evitar links
+        eventContent: function(arg) {
+          return {
+            html: `<div class="fc-event-content">${arg.event.title}</div>`
+          };
         },
-        events: '{% url "events_json" %}'
+        
+        eventClick: function(info) {
+          info.jsEvent.preventDefault();
+          
+          // Popup estilizado com SweetAlert2
+          Swal.fire({
+            title: info.event.title,
+            html: `
+              <div class="text-start">
+                <p><strong>📅 Data:</strong> ${info.event.start.toLocaleDateString('pt-BR')}</p>
+                ${info.event.extendedProps.descricao ? 
+                  `<p><strong>📝 Descrição:</strong> ${info.event.extendedProps.descricao}</p>` : ''}
+                ${info.event.extendedProps.local ? 
+                  `<p><strong>📍 Local:</strong> ${info.event.extendedProps.local}</p>` : ''}
+              </div>
+            `,
+            showCloseButton: true,
+            showConfirmButton: false,
+            width: '600px',
+            background: '#fff',
+            customClass: {
+              popup: 'border-radius-8',
+              title: 'text-primary mb-3'
+            }
+          });
+        }
       });
 
       calendar.render();
+
+      // CSS para melhorar a aparência
+      const style = document.createElement('style');
+      style.textContent = `
+        .fc-event {
+          cursor: pointer !important;
+          border: none !important;
+          background-color: #4e73df !important;
+          padding: 5px !important;
+          border-radius: 4px !important;
+        }
+        .fc-event:hover {
+          opacity: 0.9;
+          transform: scale(1.02);
+        }
+        .border-radius-8 {
+          border-radius: 8px !important;
+        }
+      `;
+      document.head.appendChild(style);
     });
   </script>
 </div>

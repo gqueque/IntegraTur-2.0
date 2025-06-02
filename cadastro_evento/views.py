@@ -187,30 +187,22 @@ def calendario_view(request):
 
 # Fornece os eventos em JSON para o FullCalendar
 def events_json(request):
-    query = request.GET.get('q', '')
-    data_inicial = request.GET.get('data_inicial', '')
-    data_final = request.GET.get('data_final', '')
-    responsavel = request.GET.get('responsavel', '')
-
-    eventos_qs = Evento.objects.all()
-
-    if data_inicial:
-        eventos_qs = eventos_qs.filter(data__gte=data_inicial)
-    if data_final:
-        eventos_qs = eventos_qs.filter(data__lte=data_final)
-    if responsavel:
-        eventos_qs = eventos_qs.filter(responsavel__icontains=responsavel)
-    if query:
-        eventos_qs = eventos_qs.filter(titulo__icontains=query)
-
-    events = [
-        {
-            'id': e.id,
-            'title': e.titulo,
-            'start': e.data.isoformat(),
-        } for e in eventos_qs
-    ]
+    eventos = Evento.objects.all()
+    events = []
+    for evento in eventos:
+        event_data = {
+            'id': evento.id,
+            'title': evento.titulo,
+            'start': evento.data.isoformat(),
+            'extendedProps': {  # TODOS OS DETALHES AQUI
+                'descricao': evento.descricao,
+                'local': evento.local,
+                'data_formatada': evento.data.strftime('%d/%m/%Y'),
+                'responsavel': evento.responsavel,
+                'imagem_url': evento.imagem.url if evento.imagem else None,
+                'programacao': evento.programacao if evento.programacao else []
+            }
+        }
+        events.append(event_data)
     return JsonResponse(events, safe=False)
-
-
 
