@@ -2,6 +2,7 @@
   "dependencies": {
     "@fullcalendar/core": "^6.1.17",
     "@fullcalendar/daygrid": "^6.1.17",
-    "@googlemaps/markerclusterer": "^2.5.3"
+    "@googlemaps/markerclusterer": "^2.5.3",
+    "fullcalendar": "^6.1.17"
   }
 }

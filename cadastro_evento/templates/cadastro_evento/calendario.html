@@ -1,70 +1,39 @@
 {% extends 'cadastro_evento/base.html' %}
 {% load static %}
-{% block content %}
+{% block conteudo %}
+<div class="content">
+  <div id="calendar" style="padding: 1rem;"></div>
 
-<div class="filters" style="display:flex; gap:1rem; margin-bottom:1rem;">
-  <select id="category-filter">
-    <option value="">Todos</option>
-    <option value="Oficina">Oficina</option>
-    <option value="Show">Show</option>
-    <!-- adicionar outras categorias -->
-  </select>
+  <!-- FullCalendar via CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
-  <input id="location-filter" type="text" placeholder="Cidade ou CEP" />
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const calendarEl = document.getElementById('calendar');
 
-  <select id="type-filter">
-    <option value="">Todos</option>
-    <option value="Cultura">Cultura</option>
-    <option value="Turismo">Turismo</option>
-    <!-- adicionar outros tipos -->
-  </select>
-</div>
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        locale: 'pt-br',
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+        },
+        buttonText: {
+          today: 'Hoje',
+        },
+        views: {
+          listMonth: { buttonText: 'lista' },
+          dayGridMonth: { buttonText: 'mês' },
+          timeGridWeek: { buttonText: 'semana' },
+          timeGridDay: { buttonText: 'dia' },
+        },
+        events: '{% url "events_json" %}'
+      });
 
-<div id="calendar"></div>
-
-<!-- FullCalendar CSS -->
-<link href="https://cdn.jsdelivr.net/npm/@fullcalendar/core/main.min.css" rel="stylesheet" />
-<link href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid/main.min.css" rel="stylesheet" />
-<link href="{% static 'vendor/fullcalendar/core/main.min.css' %}" rel="stylesheet">
-<link href="{% static 'vendor/fullcalendar/daygrid/main.min.css' %}" rel="stylesheet">
-
-<!-- FullCalendar JS -->
-<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core/main.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid/main.min.js"></script>
-<script src="{% static 'vendor/fullcalendar/core/main.min.js' %}"></script>
-<script src="{% static 'vendor/fullcalendar/daygrid/main.min.js' %}"></script>
-<script type="module" src="{% static 'eventos/js/calendario.js' %}"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  var calendarEl = document.getElementById('calendar');
-  var calendar = new FullCalendar.Calendar(calendarEl, {
-    plugins: [ 'dayGrid' ],
-    initialView: 'dayGridMonth',
-    headerToolbar: {
-      left: 'prev,next today',
-      center: 'title',
-      right: ''
-    },
-    events: {
-      url: '{% url "events_json" %}',
-      extraParams: function() {
-        return {
-          category: document.getElementById('category-filter').value,
-          location: document.getElementById('location-filter').value,
-          type: document.getElementById('type-filter').value
-        };
-      }
-    }
-  });
-  calendar.render();
-
-  // Atualiza eventos ao mudar filtros
-  ['category-filter', 'location-filter', 'type-filter'].forEach(function(id) {
-    document.getElementById(id).addEventListener('change', function() {
-      calendar.refetchEvents();
+      calendar.render();
     });
-  });
-});
-</script>
+  </script>
+</div>
 {% endblock %}

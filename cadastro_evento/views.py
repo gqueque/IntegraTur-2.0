@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from unidecode import unidecode
 from rest_framework import viewsets
@@ -182,34 +182,35 @@ def excluir_evento(request, id):
 
 # Renderiza a página do calendário
 def calendario_view(request):
-    return render(request, 'cadastro_evento/calendario.html')
+    eventos = Evento.objects.all().order_by('data')
+    return render(request, 'cadastro_evento/calendario.html', {'eventos': eventos})
 
 # Fornece os eventos em JSON para o FullCalendar
 def events_json(request):
-    # Recebe filtros opcionais via query params
-    categoria = request.GET.get('category')
-    localizacao = request.GET.get('location')
-    tipo = request.GET.get('type')
+    query = request.GET.get('q', '')
+    data_inicial = request.GET.get('data_inicial', '')
+    data_final = request.GET.get('data_final', '')
+    responsavel = request.GET.get('responsavel', '')
 
-    qs = Evento.objects.all()
-    if categoria:
-        qs = qs.filter(categoria__iexact=categoria)
-    if localizacao:
-        qs = qs.filter(localizacao__icontains=localizacao)
-    if tipo:
-        qs = qs.filter(tipo__iexact=tipo)
+    eventos_qs = Evento.objects.all()
+
+    if data_inicial:
+        eventos_qs = eventos_qs.filter(data__gte=data_inicial)
+    if data_final:
+        eventos_qs = eventos_qs.filter(data__lte=data_final)
+    if responsavel:
+        eventos_qs = eventos_qs.filter(responsavel__icontains=responsavel)
+    if query:
+        eventos_qs = eventos_qs.filter(titulo__icontains=query)
 
     events = [
         {
             'id': e.id,
             'title': e.titulo,
             'start': e.data.isoformat(),
-            'extendedProps': {
-                'categoria': e.categoria,
-                'localizacao': e.localizacao,
-                'tipo': e.tipo,
-            }
-        }
-        for e in qs
+        } for e in eventos_qs
     ]
     return JsonResponse(events, safe=False)
+
+
+
