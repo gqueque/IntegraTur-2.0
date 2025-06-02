@@ -471,9 +471,6 @@ Produzir histórias, storyboards e sketches para atender os 15 entregáveis do "
 ### **Backlog bug tracker**
 ![Backlog bug tracker](./assets/Bug%20tracker.png)
 
-
-
-
-
-
+## BACKLOG SPRINT 3
+![Backlog de tarefas Sprint 3](./assets/BACKLOG%20sprint%203.jpeg)
 --- 
