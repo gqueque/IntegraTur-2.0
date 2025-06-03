@@ -5,28 +5,42 @@
 
 <div class="content">
   <div class="filtro_and_search mb-4 d-flex justify-content-between align-items-center">
-    <div class="filtro">
-      <h5>Filtrar por secretaria</h5>
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="culturaCheckbox" onchange="filtrarEventos()">
-        <label class="form-check-label" for="culturaCheckbox">Secretaria de Cultura</label>
-      </div>
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="turismoCheckbox" onchange="filtrarEventos()">
-        <label class="form-check-label" for="turismoCheckbox">Secretaria de Turismo</label>
-      </div>
+  <!-- Filtro por Secretaria (Checkbox) -->
+  <div class="filtro">
+    <h5 style="font-size: 30px;">Filtrar por secretaria</h5>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" id="culturaCheckbox" onchange="filtrarEventos()">
+      <label class="form-check-label" for="culturaCheckbox">Secretaria de Cultura</label>
     </div>
-
-    <div class="search-oficial">
-      <form method="get" action="{% url 'home' %}" class="d-flex" style="gap: 10px;">
-        <input type="text" name="q" placeholder="Pesquisar por nome..." value="{{ request.GET.q }}" class="form-control">
-        <input type="date" name="data_inicial" value="{{ request.GET.data_inicial }}" class="form-control">
-        <input type="date" name="data_final" value="{{ request.GET.data_final }}" class="form-control">
-        <button type="submit" class="btn btn-primary">🔍</button>
-        <a href="{% url 'home' %}" class="btn btn-secondary">🧹 Limpar</a>
-      </form>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" id="turismoCheckbox" onchange="filtrarEventos()">
+      <label class="form-check-label" for="turismoCheckbox">Secretaria de Turismo</label>
     </div>
   </div>
+
+  
+  <div class="search-oficial">
+    <form method="get" action="{% url 'home' %}" class="d-flex align-items-end gap-2">
+      
+      <div class="flex-grow-1">
+        <input type="text" name="q" placeholder="Pesquisar evento..." class="form-control">
+      </div>
+
+      <div class="d-flex flex-column">
+        <label for="data_inicial" class="form-label mb-1 small">Data inicial</label>
+        <input type="date" name="data_inicial" id="data_inicial" class="form-control">
+      </div>
+
+      <div class="d-flex flex-column">
+        <label for="data_final" class="form-label mb-1 small">Data final</label>
+        <input type="date" name="data_final" id="data_final" class="form-control">
+      </div>
+
+      <button type="submit" class="btn btn-primary px-3">Buscar</button>
+      <a href="{% url 'home' %}" class="btn btn-secondary px-3">Limpar</a>
+    </form>
+  </div>
+</div>
 
   {% for evento in eventos %}
   <div class="card mb-4 shadow-sm p-4 rounded-4 evento-card position-relative"
@@ -35,13 +49,13 @@
   
   <!-- Botões fixos no canto superior direito -->
   <div style="position: absolute; top: 16px; right: 16px;" class="d-flex gap-2">
-    <a href="{% url 'editar_evento' evento.id %}" class="btn btn-sm btn-warning p-1" title="Editar">✏️</a>
+    <a href="{% url 'editar_evento' evento.id %}" class="btn btn-sm btn-warning p-1" title="Editar">Editar</a>
     <form action="{% url 'excluir_evento' evento.id %}" method="post" style="margin: 0;">
       {% csrf_token %}
       <button type="button"
         class="btn btn-sm btn-danger btn-excluir-evento"
         data-id="{{ evento.id }}">
-        🗑️ 
+      Excluir 
       </button>
     </form>
   </div>

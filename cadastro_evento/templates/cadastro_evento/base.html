@@ -5,13 +5,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <title>Novo Evento - IntegraTur</title>
+  <title>IntegraTur</title>
+  <link rel="icon" href="{% static 'imagens/favicon.ico' %}" type="image/ico">
   <style>
     body {
       background-color: #f8f9fa;
     }
-  
-    /* Topo amarelo com logo */
+
+    /* Topo com logo + navbar */
     .top-header {
       position: fixed;
       top: 0;
@@ -22,65 +23,88 @@
       z-index: 1030;
       display: flex;
       align-items: center;
-      padding-left: 20px;
+      justify-content: space-between;
+      padding: 0 30px;
       border-bottom: 1px solid #ccc;
     }
-  
+
     .logo {
-      height: 55px;
-      max-width: 90%;
+      height: 70px;
+      max-width: 100%;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
-  
-    /* Sidebar agora começa abaixo da faixa do topo */
-    .sidebar {
-      width: 220px;
-      height: calc(100vh - 80px);
-      position: fixed;
-      top: 80px;
-      left: 0;
-      background-color: #ffffff;
-      border-right: 1px solid #dee2e6;
-      padding: 0;
+
+    .logo:hover {
+      opacity: 0.9;
+      transform: scale(1.05);
     }
-  
-    .sidebar .nav-link {
+
+    .nav-menu {
+      display: flex;
+      gap: 15px;
+    }
+
+    .nav-menu .nav-link {
       color: #333;
-      margin-bottom: 10px;
-    }
-  
-    .sidebar .nav-link.active {
       font-weight: bold;
+      text-decoration: none;
+      font-size: 1rem;
+      padding: 8px 15px;
+      border-radius: 5px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .nav-menu .nav-link:hover {
       color: #0d6efd;
+      background-color: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-  
-    /* Conteúdo deslocado para o lado e abaixo da faixa do topo */
+
+    .nav-menu .nav-link.active {
+      color: #0d6efd !important;
+      font-weight: bold;
+      position: relative;
+    }
+
+    .nav-menu .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 15%;
+      width: 70%;
+      height: 3px;
+      background-color: #0d6efd;
+      border-radius: 3px;
+    }
+
     .content {
-      margin-left: 240px;
-      margin-top: 100px;
-      padding: 20px;
+      margin-top: 45px;
+      padding: 10px;
     }
-    
+
     .filtro_and_search {
       display: flex;
-      
     }
 
     .form-section {
       padding: 15px;
     }
-  
+
     .form-label, .form-control {
       font-size: 0.9rem;
     }
-  
+
     .form-control {
       padding: 6px 10px;
     }
-  
+
     .form-check {
       font-size: 0.9rem;
     }
-  
+
     .btn-save {
       position: fixed;
       bottom: 20px;
@@ -98,31 +122,45 @@
       border-width: 1px;
       border-color: #ccc #ccc #ccc #ccc;
     }
-    
-  </style>
-  
 
-
+    @media (max-width: 768px) {
+      .top-header {
+        padding: 0 15px;
+        height: 70px;
+      }
+      .logo {
+        height: 50px;
+      }
+      .nav-menu .nav-link {
+        padding: 6px 10px;
+        font-size: 0.9rem;
+      }
+    }
   </style>
 </head>
 <body>
-<!-- Topo da página com faixa amarela e logo -->
-<div class="top-header d-flex align-items-center px-4">
-  <img src="{% static 'imagens/image-removebg-preview.png' %}" alt="Logo IntegraTur" class="logo">
-</div>
 
-<!-- Sidebar -->
-<div class="sidebar">
-  <!-- Menu de navegação -->
-  <nav class="nav flex-column mt-4">
-    <a class="nav-link" href="{% url 'home' %}">🏠 Home</a>
-    <a class="nav-link" href="{% url 'calendario' %}">📅 Calendário de Eventos</a>
-    <a class="nav-link " href="{% url 'cadastro' %}">➕ Adicionar Evento</a>
-    <a class="nav-link" href="{% url 'mapa' %}">🗺️ Mapa de Evento</a>
+<!-- Topo com logo + menu -->
+<div class="top-header">
+  <a href="{% url 'home' %}" style="text-decoration: none;" title="Voltar para página inicial">
+    <img src="{% static 'imagens/image-removebg-preview.png' %}" alt="Logo IntegraTur" class="logo">
+  </a>
+  
+  <nav class="nav-menu">
+    <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Página inicial</a>
+    <a class="nav-link {% if request.resolver_match.url_name == 'calendario' %}active{% endif %}" href="{% url 'calendario' %}">Calendário</a>
+    <a class="nav-link {% if request.resolver_match.url_name == 'cadastro' %}active{% endif %}" href="{% url 'cadastro' %}">Adicionar evento</a>
+    <a class="nav-link {% if request.resolver_match.url_name == 'mapa' %}active{% endif %}" href="{% url 'mapa' %}">Mapa de evento</a>
   </nav>
 </div>
-{% block conteudo %}
-{% endblock %}
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Conteúdo da página -->
+<div class="content">
+  {% block conteudo %}
+  {% endblock %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

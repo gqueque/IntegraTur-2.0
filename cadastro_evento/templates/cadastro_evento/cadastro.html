@@ -1,7 +1,7 @@
 {% extends "cadastro_evento/base.html" %}
 {%block conteudo%}
   <div class="content">
-    <h2 class=" mb-4">Novo Evento</h2>
+    <h2 class=" mb-4">Cadastro de evento</h2>
 
     <form action="{% url 'listagem_evento' %}" method="post" enctype="multipart/form-data">
       {% csrf_token %}
