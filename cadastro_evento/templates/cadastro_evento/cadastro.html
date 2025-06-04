@@ -1,243 +1,481 @@
 {% extends "cadastro_evento/base.html" %}
-{%block conteudo%}
+{% load static %} {# Certifique-se que static está carregado #}
+
+{% block conteudo %}
 <style>
-  select {
-    width: 100%;
-    padding: 3px 5px;
+  /* Estilos para a área dos checkboxes de equipamentos */
+  .equipamentos-checkbox-container {
+    max-height: 250px; 
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 3px;
+  }
+
+  .equipamento-item-wrapper { 
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .equipamento-item-label { 
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    flex-grow: 1; 
+  }
+
+  .equipamento-item-label input[type="checkbox"] {
+    margin-right: 8px;
+  }
+
+  .equipamento-quantity-input {
+    width: 60px;
+    padding: 2px 5px;
+    font-size: 0.85rem;
     border: 1px solid #ccc;
     border-radius: 3px;
+    margin-left: 10px;
+  }
+
+  #equipamentos_selecionados_display {
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+    background-color: #f9f9f9;
+    min-height: 30px;
     font-size: 0.9rem;
-    cursor: pointer;
-
+    color: #333;
   }
-
-  select:hover {
-    border-color: #007BFF;
-  }
-
-  select:focus {
-    outline: none;
-    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25);
-    border-color: #007bff;
-  }
-
 </style>
-  <div class="content">
-    <h2 class=" mb-4">Cadastro de evento</h2>
 
-    <form action="{% url 'listagem_evento' %}" method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      <div class="row">
-    
-        <!-- Coluna esquerda -->
-        <div class="col-md-6">
-          <div class="card form-section mb-3">
-            <h5>Informações Básicas</h5>
-    
-            <div class="mb-2">
-              <label class="form-label">Título</label>
-              <input name="titulo" type="text" class="form-control form-control-sm" placeholder="Digite o nome do evento" required>
-            </div>
-    
-            <div class="mb-2">
-              <label class="form-label">Responsável</label>
-              <select name="responsavel" class="form-select form-select-sm" required>
-                <option value="">Selecione</option>
-                <option value="Secretaria de Turismo">Secretaria de Turismo</option>
-                <option value="Secretaria de Cultura">Secretaria de Cultura</option>
-              </select>
-            </div>
-    
-            <div class="mb-2">
-              <label class="form-label">Local</label>
-              <input id="autocomplete" name="local" type="text" class="form-control form-control-sm" placeholder="Digite o endereço" required>
-              <input type="hidden" id="latitude" name="latitude">
-              <input type="hidden" id="longitude" name="longitude">
-            </div>
-    
-            <div class="mb-2">
-              <label class="form-label">Descrição</label>
-              <textarea name="descricao" class="form-control form-control-sm" placeholder="Descreva o conteúdo do seu evento" rows="2"></textarea>
-            </div>
-    
-            <div class="mb-2">
-              <label class="form-label">Data</label>
-              <input name="data" type="date" class="form-control form-control-sm" required>
-            </div>
-    
-            <div class="mb-2">
-              <label class="form-label">Atrações</label>
-              <input name="atracoes" type="text" class="form-control form-control-sm" placeholder="Atrações do evento">
-            </div>
-    
-            <div class="mb-2">
-              <label class="form-label">Orçamento Estimado</label>
-              
-              <!-- Campo que o usuário vê -->
-              <input 
-                id="orcamento_mascara" 
-                type="text" 
-                class="form-control form-control-sm" 
-                placeholder="R$ 0,00"
-                maxlength="15">
-              
-              <!-- Campo escondido que será enviado -->
-              <input 
-                id="orcamento_real" 
-                name="orcamento_estimado" 
-                type="hidden">
-            </div>
-            
-            <script>
-              document.getElementById('orcamento_mascara').addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, ''); // pega só os dígitos
-                
-                // Corrige o caso de ficar 0 inicial
-                value = value.replace(/^0+/, '');
-                
-                if (value.length < 3) {
-                  value = value.padStart(3, '0'); // mínimo 3 dígitos: 0,00
+<div class="content">
+  <h2 class="mb-4">Cadastro de Evento</h2>
+
+  {# !! IMPORTANTE !! Ajuste 'nome_da_url_para_salvar_evento' para o nome da URL da sua view 'eventos' (a que CRIA o evento) no seu urls.py #}
+  <form action="{% url 'nome_da_url_para_salvar_evento' %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card form-section mb-3">
+          <h5>Informações Básicas</h5>
+          <div class="mb-2">
+            <label class="form-label">Título</label>
+            <input name="titulo" type="text" class="form-control form-control-sm" placeholder="Digite o nome do evento" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Responsável</label>
+            <select name="responsavel" class="form-select form-select-sm" required>
+              <option value="">Selecione</option>
+              <option value="Secretaria de Turismo">SECRETARIA DE TURISMO</option>
+              <option value="Secretaria de Cultura">SECRETARIA DE CULTURA</option>
+            </select>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Local</label>
+            <input id="autocomplete" name="local" type="text" class="form-control form-control-sm" placeholder="Digite o endereço" required>
+            <input type="hidden" id="latitude" name="latitude">
+            <input type="hidden" id="longitude" name="longitude">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Descrição</label>
+            <textarea name="descricao" class="form-control form-control-sm" placeholder="Descreva o conteúdo do seu evento" rows="2"></textarea>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Data</label>
+            <input name="data" type="date" class="form-control form-control-sm" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Atrações</label>
+            <input name="atracoes" type="text" class="form-control form-control-sm" placeholder="Atrações do evento">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Orçamento Estimado</label>
+            <input id="orcamento_mascara" type="text" class="form-control form-control-sm" placeholder="R$ 0,00">
+            <input id="orcamento_real" name="orcamento_estimado" type="hidden">
+          </div>
+          <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const orcamentoMascara = document.getElementById('orcamento_mascara');
+                const orcamentoReal = document.getElementById('orcamento_real');
+                if(orcamentoMascara && orcamentoReal) { 
+                    orcamentoMascara.addEventListener('input', function(e) {
+                        let value = e.target.value.replace(/\D/g, '');
+                        value = value.replace(/^0+/, '');
+                        if (value.length === 0) { 
+                            orcamentoReal.value = ''; e.target.value = ''; return;
+                        }
+                        if (value.length < 3) value = value.padStart(3, '0');
+                        let integer = value.slice(0, -2) || "0";
+                        let decimal = value.slice(-2);
+                        let formatted = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + decimal;
+                        e.target.value = 'R$ ' + formatted;
+                        orcamentoReal.value = (parseInt(value) / 100).toFixed(2);
+                    });
                 }
-              
-                let integer = value.slice(0, -2);
-                let decimal = value.slice(-2);
-                
-                let formatted = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + decimal;
-                
-                e.target.value = 'R$ ' + formatted;
-              
-                // Atualiza o campo oculto sem máscara para enviar ao Django
-                let real = (parseInt(value) / 100).toFixed(2);
-                document.getElementById('orcamento_real').value = real;
-              });
-              </script>
-    
-            <div class="mb-2">
-              <label class="form-label">Programação</label>
-              <textarea name="programacao" class="form-control form-control-sm" rows="2" placeholder="Liste a programação"></textarea>
-            </div>
-    
-            <div class="mb-3">
-              <label class="form-label">Imagem do Evento</label>
-              <input name="imagem" type="file" class="form-control">
-            </div>
-          </div> <!-- Fecha primeira coluna -->
-        </div>
-    
-        <!-- Coluna direita (depois da imagem) -->
-        <div class="col-md-6">
-          <div class="card form-section mb-3">
-            <h5>Recursos</h5>
-    
-            <div class="mb-2">
-              <label for="equipamento" class="form-label">Equipamento</label>
-              <select name="equipamento" id="equipamento" required>
-                {% if equipamentos %}
-                  <option value="">Selecione</option>
-                  {% for e in equipamentos %}
-                    {% if e %}
-                      <option value="{{ e }}">{{ e }}</option> 
-                    {% endif %}
-                  {% endfor %} 
-                {% else %} 
-                  <option value="">Não há opções disponíveis</option> 
-                {% endif %}
-              </select>
-            </div>
-    
-            <div class="mb-2">
-              <label for="fornecedores" class="form-label">Fornecedores</label>
-              <select name="fornecedores" id="fornecedores" required>
-                {% if fornecedores %}
-                  <option value="">Selecione</option>
-                  {% for f in fornecedores %}
-                    {% if f %}
-                      <option value="{{ f }}">{{ f }}</option>
-                    {% endif %}
-                  {% endfor %}
-                {% else %}
-                  <option value="">Não há opções disponíveis</option>
-                {% endif %}
-              </select>
-            </div>
-    
-            <div class="mb-2">
-              <label for="patrocinadores" class="form-label">Patrocinadores</label>
-              <select name="patrocinadores" id="patrocinadores" required>
-                {% if patrocinadores %}
-                  <option value="">Selecione</option>
-                  {% for p in patrocinadores %}
-                    {% if p %}
-                      <option value="{{ p }}">{{ p }}</option>
-                    {% endif %}
-                  {% endfor %}
-                {% else %}
-                  <option value="">Não há opções disponíveis</option>
-                {% endif %}
-              </select>
-            </div>
+            });
+          </script>
+          <div class="mb-2">
+            <label class="form-label">Programação</label>
+            <textarea name="programacao" class="form-control form-control-sm" rows="2" placeholder="Liste a programação"></textarea>
           </div>
-    
-          <div class="card form-section mb-3">
-            <h5>Requisitos</h5>
-    
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="alvara" id="alvara">
-              <label class="form-check-label" for="alvara">Alvará</label>
-            </div>
-    
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="licenca_bombeiros" id="licenca_bombeiros">
-              <label class="form-check-label" for="licenca_bombeiros">Licença Bombeiros</label>
-            </div>
-    
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="autorizacao_sonora" id="autorizacao_sonora">
-              <label class="form-check-label" for="autorizacao_sonora">Autorização Sonora</label>
-            </div>
-          </div>
-    
-          <div class="card form-section mb-3">
-            <h5>Outros</h5>
-    
-            <div class="mb-2">
-              <label class="form-label">Segurança</label>
-              <input name="seguranca" type="text" class="form-control form-control-sm">
-            </div>
-    
-            <div class="mb-2">
-              <label class="form-label">Marketing</label>
-              <input name="marketing" type="text" class="form-control form-control-sm">
-            </div>
+          <div class="mb-3">
+            <label class="form-label">Imagem do Evento</label>
+            <input name="imagem" type="file" class="form-control">
           </div>
         </div>
-    
-      </div> <!-- fecha row -->
-      
-      <button type="submit" class="btn btn-primary btn-save">Salvar</button>
-    </form>
-    
-      <script
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdV3seSOOBkqraltqD7TTh4U3FGC3pEC0&libraries=places&callback=initAutocomplete"
-    async defer>
-    </script>
+      </div>
 
-<script>
-  function initAutocomplete() {
-    const input = document.getElementById('autocomplete');
-    const autocomplete = new google.maps.places.Autocomplete(input);
+      <div class="col-md-6">
+        <div class="card form-section mb-3">
+          <h5>Recursos</h5>
+          <div class="mb-2">
+            <label class="form-label">Equipamentos</label>
+            <div id="equipamentos_selecionados_display">Nenhum equipamento selecionado.</div>
+            <div id="equipamentos_checkbox_container" class="equipamentos-checkbox-container">
+              
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="SOM PALESTRA"> SOM PALESTRA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="SOM PALESTRA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="SOM COM ILUMINAÇÃO"> SOM COM ILUMINAÇÃO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="SOM COM ILUMINAÇÃO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="SOM DE GRANDE PORTE"> SOM DE GRANDE PORTE</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="SOM DE GRANDE PORTE">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PALCO"> PALCO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PALCO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="LUZ"> LUZ</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="LUZ">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="FUMAÇA"> FUMAÇA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="FUMAÇA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PISO - PALCO"> PISO - PALCO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PISO - PALCO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PISO - LINÓLEO"> PISO - LINÓLEO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PISO - LINÓLEO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PISO - PLATAFORMA PANTOGRÁFICA"> PISO - PLATAFORMA PANTOGRÁFICA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PISO - PLATAFORMA PANTOGRÁFICA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PULA PULA"> PULA PULA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PULA PULA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PISCINA DE BOLAS"> PISCINA DE BOLAS</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PISCINA DE BOLAS">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="CAMA ELÁSTICA"> CAMA ELÁSTICA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="CAMA ELÁSTICA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="TOBOGÃ"> TOBOGÃ</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="TOBOGÃ">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="EURO BUNGUY 1 EM 1"> EURO BUNGUY 1 EM 1</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="EURO BUNGUY 1 EM 1">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="EURO BUNGUY 4 EM 1"> EURO BUNGUY 4 EM 1</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="EURO BUNGUY 4 EM 1">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="TOURO MECANICO"> TOURO MECANICO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="TOURO MECANICO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="LOCONAUTA / GIROSCÓPIO"> LOCONAUTA / GIROSCÓPIO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="LOCONAUTA / GIROSCÓPIO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="RECREADORES"> RECREADORES</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="RECREADORES">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="KID PLAY"> KID PLAY</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="KID PLAY">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="MURO DE ESCALADA"> MURO DE ESCALADA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="MURO DE ESCALADA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GERADOR 55 KVA"> GERADOR 55 KVA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="GERADOR 55 KVA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GERADOR 100 KVA"> GERADOR 100 KVA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="GERADOR 100 KVA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GERADOR 180 KVA"> GERADOR 180 KVA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="GERADOR 180 KVA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="TENDA 5X5 MODELO PIRAMIDE"> TENDA 5X5 MODELO PIRAMIDE</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="TENDA 5X5 MODELO PIRAMIDE">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="TENDA 5X5 MODELO CHAPEU DE BRUXA"> TENDA 5X5 MODELO CHAPEU DE BRUXA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="TENDA 5X5 MODELO CHAPEU DE BRUXA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="TENDA 10X10"> TENDA 10X10</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="TENDA 10X10">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PAVILHÃO 10X10"> PAVILHÃO 10X10</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PAVILHÃO 10X10">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="CACHEPOT DE MADEIRA"> CACHEPOT DE MADEIRA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="CACHEPOT DE MADEIRA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="BANQUETA ALTA EM PINUS"> BANQUETA ALTA EM PINUS</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="BANQUETA ALTA EM PINUS">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="MESA ALTA REDONDA OU QUADRADA"> MESA ALTA REDONDA OU QUADRADA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="MESA ALTA REDONDA OU QUADRADA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="BANCO EM MADEIRA"> BANCO EM MADEIRA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="BANCO EM MADEIRA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="MESA BAIXA COM 4 BANCOS"> MESA BAIXA COM 4 BANCOS</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="MESA BAIXA COM 4 BANCOS">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="CADEIRA AÇO"> CADEIRA AÇO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="CADEIRA AÇO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="CADEIRA BOTECO"> CADEIRA BOTECO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="CADEIRA BOTECO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="MESA BOTECO"> MESA BOTECO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="MESA BOTECO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GAVETEIRO MDF"> GAVETEIRO MDF</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="GAVETEIRO MDF">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PUF"> PUF</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PUF">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="MESA ESTAÇÃO DE TRABALHO"> MESA ESTAÇÃO DE TRABALHO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="MESA ESTAÇÃO DE TRABALHO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="MESA GRANDE RETANGULAR 8 LUGARES"> MESA GRANDE RETANGULAR 8 LUGARES</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="MESA GRANDE RETANGULAR 8 LUGARES">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="BALCÃO DE ATENDIMENTO 1X0,60"> BALCÃO DE ATENDIMENTO 1X0,60</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="BALCÃO DE ATENDIMENTO 1X0,60">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="BALCÃO DE ATENDIMENTO 1,50X0,60"> BALCÃO DE ATENDIMENTO 1,50X0,60</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="BALCÃO DE ATENDIMENTO 1,50X0,60">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="FECHAMENTO"> FECHAMENTO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="FECHAMENTO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="RAMPA"> RAMPA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="RAMPA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="ESCADA"> ESCADA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="ESCADA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GRADIL"> GRADIL</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="GRADIL">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GRID P 30"> GRID P 30</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="GRID P 30">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GRID P 50"> GRID P 50</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="GRID P 50">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="DISCIPLINADORES DE FILA"> DISCIPLINADORES DE FILA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="DISCIPLINADORES DE FILA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="CONJUNTO BARRICADA"> CONJUNTO BARRICADA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="CONJUNTO BARRICADA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PALANQUES"> PALANQUES</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PALANQUES">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="WC STAND"> WC STAND</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="WC STAND">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="WC PNE"> WC PNE</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="WC PNE">
+              </div>
+            </div>
+            <input type="hidden" name="equipamentos_data" id="equipamentos_data_hidden">
+          </div>
 
-    autocomplete.addListener('place_changed', function() {
-      const place = autocomplete.getPlace();
-      if (place.geometry) {
-        document.getElementById('latitude').value = place.geometry.location.lat();
-        document.getElementById('longitude').value = place.geometry.location.lng();
-      }
+          <div class="mb-2">
+            <label class="form-label">Fornecedores</label>
+            <textarea name="fornecedores" class="form-control form-control-sm" placeholder="Digite os fornecedores" rows="2" required></textarea>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Patrocinadores</label>
+            <textarea name="patrocinadores" class="form-control form-control-sm" placeholder="Digite os patrocinadores" rows="2" required></textarea>
+          </div>
+        </div>
+
+        <div class="card form-section mb-3">
+          <h5>Outros</h5>
+          <div class="mb-2">
+            <label class="form-label">Contratações</label>
+            <textarea name="contratacoes" class="form-control form-control-sm" rows="2"></textarea>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Estruturas</label>
+            <textarea name="estruturas" class="form-control form-control-sm" rows="2"></textarea>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Marketing</label>
+            <input name="marketing" type="text" class="form-control form-control-sm">
+          </div>
+        </div>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary btn-save">Salvar</button>
+  </form>
+  
+  {# !! IMPORTANTE !! Substitua YOUR_API_KEY pela sua chave real do Google Maps #}
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initAutocomplete" async defer></script>
+
+  <script>
+    function initAutocomplete() {
+      const input = document.getElementById('autocomplete');
+      if (!input) return; 
+      const autocomplete = new google.maps.places.Autocomplete(input);
+      autocomplete.addListener('place_changed', function () {
+        const place = autocomplete.getPlace();
+        if (place.geometry) {
+          const latInput = document.getElementById('latitude');
+          const lonInput = document.getElementById('longitude');
+          if(latInput) latInput.value = place.geometry.location.lat();
+          if(lonInput) lonInput.value = place.geometry.location.lng();
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const containerCheckboxes = document.getElementById('equipamentos_checkbox_container');
+        const displayEquipamentos = document.getElementById('equipamentos_selecionados_display');
+        const hiddenInputEquipamentosData = document.getElementById('equipamentos_data_hidden');
+
+        if (!containerCheckboxes || !displayEquipamentos || !hiddenInputEquipamentosData) {
+            // console.warn("Elementos do formulário de equipamentos não encontrados."); // Comentado para não poluir console se intencional
+            return;
+        }
+
+        let equipamentosSelecionadosComQuantidade = []; 
+
+        function atualizarTudo() {
+            equipamentosSelecionadosComQuantidade = [];
+            const todosCheckboxes = containerCheckboxes.querySelectorAll('.equipamento-checkbox');
+            
+            todosCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    const nomeEquipamento = checkbox.value; // Já deve estar em MAIÚSCULAS pelo HTML
+                    const quantityInput = containerCheckboxes.querySelector(`.equipamento-quantity-input[data-equipamento="${CSS.escape(nomeEquipamento)}"]`);
+                    
+                    let quantidade = 1; 
+                    if (quantityInput) {
+                        quantidade = parseInt(quantityInput.value) || 1; 
+                    }
+                    equipamentosSelecionadosComQuantidade.push({ nome: nomeEquipamento, quantidade: quantidade });
+                }
+            });
+
+            if (equipamentosSelecionadosComQuantidade.length > 0) {
+                displayEquipamentos.textContent = equipamentosSelecionadosComQuantidade
+                    .map(item => `${item.quantidade} x ${item.nome}`)
+                    .join(', ');
+            } else {
+                displayEquipamentos.textContent = 'Nenhum equipamento selecionado.';
+            }
+            hiddenInputEquipamentosData.value = JSON.stringify(equipamentosSelecionadosComQuantidade);
+        }
+
+        containerCheckboxes.querySelectorAll('.equipamento-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function(event) {
+                const nomeEquipamento = event.target.value; // Já em MAIÚSCULAS
+                const quantityInput = event.target.closest('.equipamento-item-wrapper').querySelector(`.equipamento-quantity-input[data-equipamento="${CSS.escape(nomeEquipamento)}"]`);
+                
+                if (!quantityInput) {
+                    console.error(`Input de quantidade não encontrado para ${nomeEquipamento}.`);
+                    atualizarTudo(); 
+                    return; 
+                }
+
+                if (event.target.checked) {
+                    quantityInput.style.display = 'inline-block';
+                    quantityInput.value = '1'; 
+                } else {
+                    quantityInput.style.display = 'none'; 
+                }
+                atualizarTudo();
+            });
+        });
+
+        containerCheckboxes.querySelectorAll('.equipamento-quantity-input').forEach(quantityInput => {
+            quantityInput.addEventListener('input', function(event) {
+                if (parseInt(event.target.value) < 1 && event.target.value !== "") { 
+                    event.target.value = '1';
+                }
+                atualizarTudo();
+            });
+            quantityInput.addEventListener('blur', function(event) { 
+                if (!event.target.value || parseInt(event.target.value) < 1 ) {
+                    event.target.value = '1'; 
+                    atualizarTudo();
+                }
+            });
+        });
+        
+        containerCheckboxes.querySelectorAll('.equipamento-quantity-input').forEach(qInput => {
+            qInput.style.display = 'none'; 
+        });
+        atualizarTudo(); 
     });
-  }
-</script>
-
-      
-    </form>
-  </div>
+  </script>
+</div>
 {% endblock %}

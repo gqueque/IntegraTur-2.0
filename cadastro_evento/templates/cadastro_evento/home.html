@@ -1,116 +1,116 @@
 {% extends "cadastro_evento/base.html" %}
 {% load static %}
+{% load l10n %} {# Necessário para o filtro 'unlocalize' no orçamento #}
 
 {% block conteudo %}
 
 <div class="content">
-  <div class="filtro_and_search mb-4 d-flex justify-content-between align-items-center">
-  <!-- Filtro por Secretaria (Checkbox) -->
-  <div class="filtro">
-    <h5 style="font-size: 30px;">Filtrar por secretaria</h5>
-    <div class="form-check">
-      <input class="form-check-input" type="checkbox" id="culturaCheckbox" onchange="filtrarEventos()">
-      <label class="form-check-label" for="culturaCheckbox">Secretaria de Cultura</label>
+  <div class="filtro_and_search mb-4 d-flex justify-content-between align-items-center flex-wrap"> {# Adicionado flex-wrap para responsividade #}
+    <div class="filtro mb-3 mb-md-0"> {# Adicionado margin-bottom para telas menores #}
+      <h5 style="font-size: 1.5rem;">Filtrar por secretaria</h5> {# Ajustado tamanho da fonte #}
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="culturaCheckbox" onchange="filtrarEventos()">
+        <label class="form-check-label" for="culturaCheckbox">Secretaria de Cultura</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="turismoCheckbox" onchange="filtrarEventos()">
+        <label class="form-check-label" for="turismoCheckbox">Secretaria de Turismo</label>
+      </div>
     </div>
-    <div class="form-check">
-      <input class="form-check-input" type="checkbox" id="turismoCheckbox" onchange="filtrarEventos()">
-      <label class="form-check-label" for="turismoCheckbox">Secretaria de Turismo</label>
+
+    <div class="search-oficial">
+      <form method="get" action="{% url 'home' %}" class="d-flex align-items-end gap-2 flex-wrap"> {# Adicionado flex-wrap #}
+        <div class="flex-grow-1">
+          <label for="q_search" class="form-label mb-1 small visually-hidden">Pesquisar evento</label> {# Label para acessibilidade #}
+          <input type="text" name="q" id="q_search" value="{{ query|default:'' }}" placeholder="Pesquisar evento..." class="form-control">
+        </div>
+        <div class="d-flex flex-column">
+          <label for="data_inicial" class="form-label mb-1 small">Data inicial</label>
+          <input type="date" name="data_inicial" id="data_inicial" value="{{ data_inicial|default:'' }}" class="form-control">
+        </div>
+        <div class="d-flex flex-column">
+          <label for="data_final" class="form-label mb-1 small">Data final</label>
+          <input type="date" name="data_final" id="data_final" value="{{ data_final|default:'' }}" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary px-3 align-self-end">Buscar</button> {# Alinhado com outros inputs #}
+        <a href="{% url 'home' %}" class="btn btn-secondary px-3 align-self-end">Limpar</a> {# Alinhado #}
+      </form>
     </div>
   </div>
-
-  
-  <div class="search-oficial">
-    <form method="get" action="{% url 'home' %}" class="d-flex align-items-end gap-2">
-      
-      <div class="flex-grow-1">
-        <input type="text" name="q" placeholder="Pesquisar evento..." class="form-control">
-      </div>
-
-      <div class="d-flex flex-column">
-        <label for="data_inicial" class="form-label mb-1 small">Data inicial</label>
-        <input type="date" name="data_inicial" id="data_inicial" class="form-control">
-      </div>
-
-      <div class="d-flex flex-column">
-        <label for="data_final" class="form-label mb-1 small">Data final</label>
-        <input type="date" name="data_final" id="data_final" class="form-control">
-      </div>
-
-      <button type="submit" class="btn btn-primary px-3">Buscar</button>
-      <a href="{% url 'home' %}" class="btn btn-secondary px-3">Limpar</a>
-    </form>
-  </div>
-</div>
 
   {% for evento in eventos %}
   <div class="card mb-4 shadow-sm p-4 rounded-4 evento-card position-relative"
-     data-categoria="{{ evento.responsavel }}"
-     style="border: 1px solid #696969; border-radius: 1rem;">
-  
-  <!-- Botões fixos no canto superior direito -->
-  <div style="position: absolute; top: 16px; right: 16px;" class="d-flex gap-2">
-    <a href="{% url 'editar_evento' evento.id %}" class="btn btn-sm btn-warning p-1" title="Editar">Editar</a>
-    <form action="{% url 'excluir_evento' evento.id %}" method="post" style="margin: 0;">
-      {% csrf_token %}
-      <button type="button"
-        class="btn btn-sm btn-danger btn-excluir-evento"
-        data-id="{{ evento.id }}">
-      Excluir 
-      </button>
-    </form>
-  </div>
+       data-categoria="{{ evento.responsavel }}"
+       style="border: 1px solid #e0e0e0; border-radius: 1rem;">
+    
+    <div style="position: absolute; top: 16px; right: 16px;" class="d-flex gap-2">
+      <a href="{% url 'editar_evento' evento.id %}" class="btn btn-sm btn-warning p-1 px-2" title="Editar">Editar</a>
+      {# O formulário de exclusão agora é submetido pelo JavaScript do SweetAlert #}
+      <form action="{% url 'excluir_evento' evento.id %}" method="post" style="margin: 0;" class="form-excluir-evento d-inline">
+        {% csrf_token %}
+        <button type="button"
+          class="btn btn-sm btn-danger btn-excluir-evento-swal p-1 px-2">
+          Excluir 
+        </button>
+      </form>
+    </div>
 
-  <!-- Conteúdo do card -->
-  <div class="d-flex align-items-start">
-    {% if evento.imagem %}
-      <img src="{{ evento.imagem.url }}" alt="Imagem do Evento"
-           style="width: 180px; height: 120px; object-fit: cover; border-radius: 10px;">
-    {% endif %}
+    <div class="d-flex align-items-start">
+      {% if evento.imagem %}
+        <img src="{{ evento.imagem.url }}" alt="Imagem do Evento {{ evento.titulo }}"
+             style="width: 180px; height: 120px; object-fit: cover; border-radius: 10px; margin-right: 1.5rem;">
+      {% else %}
+         <img src="{% static 'images/placeholder.jpg' %}" alt="Evento sem imagem"
+             style="width: 180px; height: 120px; object-fit: cover; border-radius: 10px; margin-right: 1.5rem;">
+      {% endif %}
 
-    <div class="ms-4">
-      <h5>{{ evento.titulo }}</h5>
-      <p class="text-muted mb-1">{{ evento.data|date:"d \d\e F \d\e Y" }}</p>
-      <p class="mb-2">{{ evento.descricao|truncatechars:120 }}</p>
-      <p class="mb-2 text-secondary"><i>Responsável: {{ evento.responsavel }}</i></p>
-      <a href="#"
-      class="btn btn-outline-secondary btn-sm"
-      data-bs-toggle="modal"
-      data-bs-target="#eventoModal"
-      onclick="mostrarDetalhes(
-        '{{ evento.titulo|escapejs }}',
-        '{{ evento.descricao|escapejs }}',
-        '{{ evento.data|date:"d/m/Y" }}',
-        '{{ evento.responsavel|escapejs }}',
-        '{% if evento.imagem %}{{ evento.imagem.url }}{% else %}{% static "images/placeholder.jpg" %}{% endif %}',
-        '{{ evento.atracoes|default:"-"|escapejs }}',
-        '{{ evento.orcamento_estimado|default:"-" }}',
-        '{{ evento.equipamento|default:"-"|escapejs }}',
-        '{{ evento.fornecedores|default:"-"|escapejs }}',
-        '{{ evento.patrocinadores|default:"-"|escapejs }}'
-      )">
-      Saiba Mais
-    </a>
+      <div class="ms-0"> {# Removido ms-4 pois a imagem agora tem margin-right #}
+        <h5>{{ evento.titulo }}</h5>
+        <p class="text-muted mb-1">{{ evento.data|date:"d \d\e F \d\e Y" }}</p>
+        <p class="mb-2" style="text-align: justify;">{{ evento.descricao|truncatechars:120 }}</p>
+        <p class="mb-2 text-secondary"><i>Responsável: {{ evento.responsavel|default:"Não informado" }}</i></p>
+        <a href="#"
+           class="btn btn-outline-secondary btn-sm"
+           data-bs-toggle="modal"
+           data-bs-target="#eventoModal"
+           onclick="mostrarDetalhes(
+             '{{ evento.titulo|escapejs }}',
+             '{{ evento.descricao|escapejs|default:"Sem descrição." }}',
+             '{{ evento.data|date:"d/m/Y" }}',
+             '{{ evento.responsavel|escapejs|default:"Não informado" }}',
+             '{% if evento.imagem %}{{ evento.imagem.url }}{% else %}{% static "images/placeholder.jpg" %}{% endif %}',
+             '{{ evento.local|escapejs|default:"Não informado" }}',
+             '{{ evento.atracoes|escapejs|default:"Não informado" }}',
+             '{{ evento.programacao|escapejs|default:"Não informado" }}',
+             '{{ evento.equipamento|escapejs|default:"[]" }}',
+             '{{ evento.fornecedores|escapejs|default:"Não informado" }}',
+             '{{ evento.patrocinadores|escapejs|default:"Não informado" }}',
+             '{{ evento.contratacoes|escapejs|default:"Não informado" }}',
+             '{{ evento.estruturas|escapejs|default:"Não informado" }}',
+             '{{ evento.marketing|escapejs|default:"Não informado" }}',
+             '{{ evento.orcamento_estimado|unlocalize|default_if_none:"0" }}'
+           )">
+          Saiba Mais
+        </a>
+      </div>
     </div>
   </div>
+  {% empty %}
+    <div class="alert alert-info mt-4" role="alert">
+      Nenhum evento encontrado com os filtros aplicados.
+    </div>
+  {% endfor %}
 </div>
 
-{% empty %}
-  <p>Nenhum evento encontrado.</p>
-{% endfor %}
-
-</div>
-
-<!-- Modal -->
 <div class="modal fade" id="eventoModal" tabindex="-1" aria-labelledby="eventoModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content p-4" style="min-height: 300px; max-height: 80vh;">
+    <div class="modal-content p-3 p-md-4" style="max-height: 90vh;"> {# Ajustado padding e max-height #}
       <div class="modal-header">
         <h5 class="modal-title" id="eventoModalLabel">Detalhes do Evento</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
       </div>
-      <div class="modal-body" id="modal-body-content">
-        <!-- Conteúdo dinâmico será inserido aqui -->
-      </div>
+      <div class="modal-body" id="modal-body-content" style="overflow-y: auto;">
+        </div>
     </div>
   </div>
 </div>
@@ -120,76 +120,148 @@
 {% if messages %}
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    {% for message in messages %}
-      Swal.fire({
-        title: 'Sucesso!',
-        text: '{{ message }}',
-        icon: 'success',
-        timer: 2500,
-        showConfirmButton: false
-      });
-    {% endfor %}
+    document.addEventListener('DOMContentLoaded', function() { // Garante que o DOM está pronto
+      {% for message in messages %}
+        Swal.fire({
+          title: '{% if message.tags == "success" %}Sucesso!{% elif message.tags == "error" %}Erro!{% elif message.tags == "warning" %}Atenção!{% else %}Info!{% endif %}',
+          text: '{{ message|escapejs }}',
+          icon: '{{ message.tags }}', // success, error, warning, info, question
+          timer: 3000, // Aumentei um pouco o timer
+          showConfirmButton: false
+        });
+      {% endfor %}
+    });
   </script>
 {% endif %}
 
 <script>
-  function mostrarDetalhes(titulo, descricao, data, responsavel, imagemUrl) {
+function formatarMoeda(valor) {
+    const numero = parseFloat(valor);
+    if (isNaN(numero)) {
+        return "Não informado"; // Ou "-"
+    }
+    return numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function mostrarDetalhes(titulo, descricao, data, responsavel, imagemUrl, 
+                         local, atracoes, programacaoStr, equipamentoJsonStr, 
+                         fornecedores, patrocinadores, contratacoes, estruturas, 
+                         marketing, orcamentoEstimado) {
+    
+    let equipamentosHtml = '<li>Não informado</li>';
+    if (equipamentoJsonStr && equipamentoJsonStr.trim() !== "[]" && equipamentoJsonStr.trim() !== "") {
+        try {
+            const equipamentosLista = JSON.parse(equipamentoJsonStr);
+            if (Array.isArray(equipamentosLista) && equipamentosLista.length > 0) {
+                equipamentosHtml = '<ul class="list-unstyled">'; // Usando list-unstyled para melhor visual
+                equipamentosLista.forEach(item => {
+                    equipamentosHtml += `<li>${item.quantidade || 1} x ${item.nome || item.value || 'Equipamento desconhecido'}</li>`; // Tenta 'nome' ou 'value'
+                });
+                equipamentosHtml += '</ul>';
+            }
+        } catch (e) {
+            // Se não for JSON válido, mas uma string simples (dados antigos), mostra como está
+            if (typeof equipamentoJsonStr === 'string') {
+                 equipamentosHtml = `<p>${equipamentoJsonStr}</p>`;
+            }
+        }
+    }
+
+    let programacaoHtml = '<p>Não informado</p>';
+    if (programacaoStr && programacaoStr.trim() !== "" && programacaoStr.trim() !== "[]" && programacaoStr.trim() !== "-") {
+        try {
+            // Tenta parsear se for uma string JSON de uma lista/objeto
+            const programacaoObj = JSON.parse(programacaoStr);
+            if (Array.isArray(programacaoObj) && programacaoObj.length > 0) {
+                programacaoHtml = '<ul class="list-unstyled">';
+                programacaoObj.forEach(item => {
+                    // Adapte aqui se a estrutura do item da programação for mais complexa
+                    if (typeof item === 'object' && item !== null) { 
+                         programacaoHtml += `<li>${JSON.stringify(item)}</li>`; // Exemplo simples para objeto
+                    } else {
+                         programacaoHtml += `<li>${item}</li>`;
+                    }
+                });
+                programacaoHtml += '</ul>';
+            } else if (typeof programacaoObj === 'object' && programacaoObj !== null && Object.keys(programacaoObj).length > 0) { 
+                 programacaoHtml = '<pre>' + JSON.stringify(programacaoObj, null, 2) + '</pre>';
+            } else if (typeof programacaoObj === 'string') { // Se parseou para uma string simples
+                 programacaoHtml = `<p>${programacaoObj}</p>`;
+            }
+        } catch (e) { // Se não for JSON, mostra como string que foi passada
+            programacaoHtml = `<p>${programacaoStr}</p>`;
+        }
+    }
+
     const conteudo = `
       <div class="row">
+        <div class="col-md-4 text-center mb-3 mb-md-0">
+          <img src="${imagemUrl}" alt="Imagem do Evento: ${titulo}" class="img-fluid" style="border-radius: 10px; max-height:280px; object-fit:cover;">
+        </div>
         <div class="col-md-8">
-          <p><strong>Título:</strong> ${titulo}</p>
+          <h4>${titulo}</h4>
           <p><strong>Data:</strong> ${data}</p>
           <p><strong>Responsável:</strong> ${responsavel}</p>
+          <p><strong>Local:</strong> ${local}</p>
           <hr>
           <p><strong>Descrição:</strong></p>
-          <p>${descricao}</p>
-        </div>
-        <div class="col-md-4 text-center">
-          <img src="${imagemUrl}" alt="Imagem do Evento" style="max-width: 100%; border-radius: 10px;">
+          <p style="text-align: justify;">${descricao}</p>
         </div>
       </div>
+      <hr>
+      <h5>Mais Informações</h5>
+      <div class="row">
+        <div class="col-md-6">
+          <p><strong>Atrações:</strong> ${atracoes}</p>
+          <p><strong>Fornecedores:</strong> ${fornecedores}</p>
+          <p><strong>Patrocinadores:</strong> ${patrocinadores}</p>
+          <p><strong>Marketing:</strong> ${marketing}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Contratações:</strong> ${contratacoes}</p>
+          <p><strong>Estruturas:</strong> ${estruturas}</p>
+          <p><strong>Orçamento Estimado:</strong> ${formatarMoeda(orcamentoEstimado)}</p>
+        </div>
+      </div>
+      <div class="mt-3">
+        <h6><strong>Programação:</strong></h6>
+        ${programacaoHtml}
+      </div>
+      <div class="mt-3">
+        <h6><strong>Equipamentos Contratados:</strong></h6>
+        ${equipamentosHtml}
+      </div>
     `;
-    document.getElementById('eventoModalLabel').innerText = titulo;
+    document.getElementById('eventoModalLabel').innerText = titulo; // Atualiza o título do modal
     document.getElementById('modal-body-content').innerHTML = conteudo;
-  }
+}
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  document.querySelectorAll('.btn-excluir-evento').forEach(btn => {
-    btn.addEventListener('click', function () {
-      const eventoId = this.getAttribute('data-id');
+// Script para SweetAlert2 de exclusão
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.btn-excluir-evento-swal').forEach(btn => {
+        btn.addEventListener('click', function (event) {
+            event.preventDefault(); // Previne qualquer ação padrão do botão se ele não for type="button"
+            const form = this.closest('form'); // Pega o formulário pai do botão
 
-      Swal.fire({
-        title: 'Tem certeza?',
-        text: 'Esta ação não poderá ser desfeita.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sim, excluir',
-        cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-      }).then(result => {
-        if (result.isConfirmed) {
-          // Cria um form dinamicamente e envia
-          const form = document.createElement('form');
-          form.method = 'POST';
-          form.action = `/excluir/${eventoId}/`;
-
-          const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-          const csrfInput = document.createElement('input');
-          csrfInput.type = 'hidden';
-          csrfInput.name = 'csrfmiddlewaretoken';
-          csrfInput.value = csrfToken;
-
-          form.appendChild(csrfInput);
-          document.body.appendChild(form);
-          form.submit();
-        }
-      });
+            Swal.fire({
+                title: 'Tem certeza?',
+                text: 'Esta ação não poderá ser desfeita.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sim, excluir',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+            }).then(result => {
+                if (result.isConfirmed) {
+                    form.submit(); // Submete o formulário original
+                }
+            });
+        });
     });
-  });
+});
 </script>
-
 
 {% endblock %}
