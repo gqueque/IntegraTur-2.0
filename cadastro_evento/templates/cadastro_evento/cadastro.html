@@ -1,5 +1,27 @@
 {% extends "cadastro_evento/base.html" %}
 {%block conteudo%}
+<style>
+  select {
+    width: 100%;
+    padding: 3px 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 0.9rem;
+    cursor: pointer;
+
+  }
+
+  select:hover {
+    border-color: #007BFF;
+  }
+
+  select:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25);
+    border-color: #007bff;
+  }
+
+</style>
   <div class="content">
     <h2 class=" mb-4">Cadastro de evento</h2>
 
@@ -108,18 +130,51 @@
             <h5>Recursos</h5>
     
             <div class="mb-2">
-              <label class="form-label">Equipamento</label>
-              <textarea name="equipamento" class="form-control form-control-sm" rows="2"></textarea>
+              <label for="equipamento" class="form-label">Equipamento</label>
+              <select name="equipamento" id="equipamento" required>
+                {% if equipamentos %}
+                  <option value="">Selecione</option>
+                  {% for e in equipamentos %}
+                    {% if e %}
+                      <option value="{{ e }}">{{ e }}</option> 
+                    {% endif %}
+                  {% endfor %} 
+                {% else %} 
+                  <option value="">Não há opções disponíveis</option> 
+                {% endif %}
+              </select>
             </div>
     
             <div class="mb-2">
-              <label class="form-label">Fornecedores</label>
-              <textarea name="fornecedores" class="form-control form-control-sm" rows="2"></textarea>
+              <label for="fornecedores" class="form-label">Fornecedores</label>
+              <select name="fornecedores" id="fornecedores" required>
+                {% if fornecedores %}
+                  <option value="">Selecione</option>
+                  {% for f in fornecedores %}
+                    {% if f %}
+                      <option value="{{ f }}">{{ f }}</option>
+                    {% endif %}
+                  {% endfor %}
+                {% else %}
+                  <option value="">Não há opções disponíveis</option>
+                {% endif %}
+              </select>
             </div>
     
             <div class="mb-2">
-              <label class="form-label">Patrocinadores</label>
-              <textarea name="patrocinadores" class="form-control form-control-sm" rows="2"></textarea>
+              <label for="patrocinadores" class="form-label">Patrocinadores</label>
+              <select name="patrocinadores" id="patrocinadores" required>
+                {% if patrocinadores %}
+                  <option value="">Selecione</option>
+                  {% for p in patrocinadores %}
+                    {% if p %}
+                      <option value="{{ p }}">{{ p }}</option>
+                    {% endif %}
+                  {% endfor %}
+                {% else %}
+                  <option value="">Não há opções disponíveis</option>
+                {% endif %}
+              </select>
             </div>
           </div>
     

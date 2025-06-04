@@ -15,7 +15,15 @@ class EventoViewSet(viewsets.ModelViewSet):
     serializer_class = EventoSerializer
 
 def cadastro_evento(request):
-    return render(request, 'cadastro_evento/cadastro.html')
+    equipamentos = Evento.objects.values_list('equipamento', flat=True). distinct()
+    fornecedores = Evento.objects.values_list('fornecedores', flat=True).distinct()
+    patrocinadores = Evento.objects.values_list('patrocinadores', flat=True).distinct()
+
+    return render(request, 'cadastro_evento/cadastro.html', {
+        'equipamentos': equipamentos,
+        'fornecedores': fornecedores,
+        'patrocinadores': patrocinadores,
+    })
 
 def eventos(request):
     if request.method == 'POST':
