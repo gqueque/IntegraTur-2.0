@@ -1,22 +1,42 @@
 {% extends "cadastro_evento/base.html" %}
+{% load static %} {# Certifique-se que static está carregado #}
+
 {% block conteudo %}
 <style>
   /* Estilos para a área dos checkboxes de equipamentos */
   .equipamentos-checkbox-container {
-    max-height: 200px; /* Altura máxima, adiciona scroll se muitos itens */
+    max-height: 250px; /* Altura máxima, adiciona scroll se muitos itens - ajustado de cadastrar.html */
     overflow-y: auto;
     border: 1px solid #ccc;
     padding: 10px;
     border-radius: 3px;
   }
 
-  .equipamento-item {
-    display: block; /* Cada item em uma nova linha */
-    margin-bottom: 5px;
+  /* Estilos de cadastrar.html para wrapper e input de quantidade */
+  .equipamento-item-wrapper { 
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
   }
 
-  .equipamento-item input[type="checkbox"] {
+  .equipamento-item-label { 
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    flex-grow: 1; 
+  }
+
+  .equipamento-item-label input[type="checkbox"] { /* Renomeado de .equipamento-item para .equipamento-item-label input */
     margin-right: 8px;
+  }
+
+  .equipamento-quantity-input {
+    width: 60px;
+    padding: 2px 5px;
+    font-size: 0.85rem;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin-left: 10px;
   }
 
   #equipamentos_selecionados_display {
@@ -84,7 +104,7 @@
               type="text" 
               class="form-control form-control-sm" 
               placeholder="R$ 0,00"
-              value=""> {# LINHA 87 CORRIGIDA #}
+              value=""> {# Value é preenchido pelo script abaixo #}
             <input 
               id="orcamento_real" 
               name="orcamento_estimado" 
@@ -93,25 +113,24 @@
           </div>
 
           <script>
-            // Script do orçamento
+            // Script do orçamento (mantido de editar.html original)
             document.addEventListener('DOMContentLoaded', function() {
                 const orcamentoMascara = document.getElementById('orcamento_mascara');
                 const orcamentoReal = document.getElementById('orcamento_real');
 
-                if (orcamentoReal.value && !isNaN(parseFloat(orcamentoReal.value))) { // Checa se tem valor e é número
+                if (orcamentoReal.value && !isNaN(parseFloat(orcamentoReal.value))) {
                     let valorNumerico = parseFloat(orcamentoReal.value);
                     let valorInicial = valorNumerico.toFixed(2).replace('.', '');
                     if (valorInicial.length < 3) valorInicial = valorInicial.padStart(3, '0');
                     
                     let integer = valorInicial.slice(0, -2) || "0";
-                    // Adicionado para tratar o caso de ser apenas centavos (ex: 0.50 -> integer seria "" antes)
                     if (integer === "" && valorNumerico < 1 && valorNumerico > 0) integer = "0";
 
                     let decimal = valorInicial.slice(-2);
                     let formatted = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + decimal;
                     orcamentoMascara.value = 'R$ ' + formatted;
                 } else if (orcamentoReal.value === '0' || orcamentoReal.value === '0.0' || orcamentoReal.value === '0.00') {
-                    orcamentoMascara.value = 'R$ 0,00'; // Especificamente para zero
+                    orcamentoMascara.value = 'R$ 0,00';
                 }
 
 
@@ -125,7 +144,7 @@
                     }
                     if (value.length < 3) value = value.padStart(3, '0');
                     
-                    let integer = value.slice(0, -2);
+                    let integer = value.slice(0, -2) || "0"; // Adicionado "|| 0" para evitar erro se vazio
                     let decimal = value.slice(-2);
                     let formatted = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + decimal;
                     e.target.value = 'R$ ' + formatted;
@@ -159,61 +178,221 @@
             
             <div id="equipamentos_checkbox_container" class="equipamentos-checkbox-container">
               {% with equipamentos_salvos=equipamentos_do_evento_lista %}
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="SOM PALESTRA" {% if "SOM PALESTRA" in equipamentos_salvos %}checked{% endif %}> SOM PALESTRA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="SOM COM ILUMINAÇÃO" {% if "SOM COM ILUMINAÇÃO" in equipamentos_salvos %}checked{% endif %}> SOM COM ILUMINAÇÃO</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="SOM DE GRANDE PORTE" {% if "SOM DE GRANDE PORTE" in equipamentos_salvos %}checked{% endif %}> SOM DE GRANDE PORTE</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="palco" {% if "palco" in equipamentos_salvos %}checked{% endif %}> palco</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="luz" {% if "luz" in equipamentos_salvos %}checked{% endif %}> luz</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="fumaça" {% if "fumaça" in equipamentos_salvos %}checked{% endif %}> fumaça</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="PISO - PALCO" {% if "PISO - PALCO" in equipamentos_salvos %}checked{% endif %}> PISO - PALCO</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="PISO - LINÓLEO" {% if "PISO - LINÓLEO" in equipamentos_salvos %}checked{% endif %}> PISO - LINÓLEO</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="PISO - PLATAFORMA PANTOGRÁFICA" {% if "PISO - PLATAFORMA PANTOGRÁFICA" in equipamentos_salvos %}checked{% endif %}> PISO - PLATAFORMA PANTOGRÁFICA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="PULA PULA" {% if "PULA PULA" in equipamentos_salvos %}checked{% endif %}> PULA PULA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="PISCINA DE BOLAS" {% if "PISCINA DE BOLAS" in equipamentos_salvos %}checked{% endif %}> PISCINA DE BOLAS</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="CAMA ELÁSTICA" {% if "CAMA ELÁSTICA" in equipamentos_salvos %}checked{% endif %}> CAMA ELÁSTICA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="TOBOGÃ" {% if "TOBOGÃ" in equipamentos_salvos %}checked{% endif %}> TOBOGÃ</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="EURO BUNGUY 1 EM 1" {% if "EURO BUNGUY 1 EM 1" in equipamentos_salvos %}checked{% endif %}> EURO BUNGUY 1 EM 1</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="EURO BUNGUY 4 EM 1" {% if "EURO BUNGUY 4 EM 1" in equipamentos_salvos %}checked{% endif %}> EURO BUNGUY 4 EM 1</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="TOURO MECANICO" {% if "TOURO MECANICO" in equipamentos_salvos %}checked{% endif %}> TOURO MECANICO</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="LOCONAUTA / GIROSCÓPIO" {% if "LOCONAUTA / GIROSCÓPIO" in equipamentos_salvos %}checked{% endif %}> LOCONAUTA / GIROSCÓPIO</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="RECREADORES" {% if "RECREADORES" in equipamentos_salvos %}checked{% endif %}> RECREADORES</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="KID PLAY" {% if "KID PLAY" in equipamentos_salvos %}checked{% endif %}> KID PLAY</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="MURO DE ESCALADA" {% if "MURO DE ESCALADA" in equipamentos_salvos %}checked{% endif %}> MURO DE ESCALADA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="GERADOR 55 KVA" {% if "GERADOR 55 KVA" in equipamentos_salvos %}checked{% endif %}> GERADOR 55 KVA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="GERADOR 100 KVA" {% if "GERADOR 100 KVA" in equipamentos_salvos %}checked{% endif %}> GERADOR 100 KVA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="GERADOR 180 KVA" {% if "GERADOR 180 KVA" in equipamentos_salvos %}checked{% endif %}> GERADOR 180 KVA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="TENDA 5X5 MODELO PIRAMIDE" {% if "TENDA 5X5 MODELO PIRAMIDE" in equipamentos_salvos %}checked{% endif %}> TENDA 5X5 MODELO PIRAMIDE</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="TENDA 5X5 MODELO CHAPEU DE BRUXA" {% if "TENDA 5X5 MODELO CHAPEU DE BRUXA" in equipamentos_salvos %}checked{% endif %}> TENDA 5X5 MODELO CHAPEU DE BRUXA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="TENDA 10X10" {% if "TENDA 10X10" in equipamentos_salvos %}checked{% endif %}> TENDA 10X10</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="PAVILHÃO 10X10" {% if "PAVILHÃO 10X10" in equipamentos_salvos %}checked{% endif %}> PAVILHÃO 10X10</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="CACHEPOT DE MADEIRA" {% if "CACHEPOT DE MADEIRA" in equipamentos_salvos %}checked{% endif %}> CACHEPOT DE MADEIRA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="BANQUETA ALTA EM PINUS" {% if "BANQUETA ALTA EM PINUS" in equipamentos_salvos %}checked{% endif %}> BANQUETA ALTA EM PINUS</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="MESA ALTA REDONDA OU QUADRADA" {% if "MESA ALTA REDONDA OU QUADRADA" in equipamentos_salvos %}checked{% endif %}> MESA ALTA REDONDA OU QUADRADA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="BANCO EM MADEIRA" {% if "BANCO EM MADEIRA" in equipamentos_salvos %}checked{% endif %}> BANCO EM MADEIRA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="MESA BAIXA COM 4 BANCOS" {% if "MESA BAIXA COM 4 BANCOS" in equipamentos_salvos %}checked{% endif %}> MESA BAIXA COM 4 BANCOS</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="CADEIRA AÇO" {% if "CADEIRA AÇO" in equipamentos_salvos %}checked{% endif %}> CADEIRA AÇO</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="CADEIRA BOTECO" {% if "CADEIRA BOTECO" in equipamentos_salvos %}checked{% endif %}> CADEIRA BOTECO</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="MESA BOTECO" {% if "MESA BOTECO" in equipamentos_salvos %}checked{% endif %}> MESA BOTECO</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="GAVETEIRO MDF" {% if "GAVETEIRO MDF" in equipamentos_salvos %}checked{% endif %}> GAVETEIRO MDF</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="PUF" {% if "PUF" in equipamentos_salvos %}checked{% endif %}> PUF</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="MESA ESTAÇÃO DE TRABALHO" {% if "MESA ESTAÇÃO DE TRABALHO" in equipamentos_salvos %}checked{% endif %}> MESA ESTAÇÃO DE TRABALHO</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="MESA GRANDE RETANGULAR 8 LUGARES" {% if "MESA GRANDE RETANGULAR 8 LUGARES" in equipamentos_salvos %}checked{% endif %}> MESA GRANDE RETANGULAR 8 LUGARES</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="BALCÃO DE ATENDIMENTO 1X0,60" {% if "BALCÃO DE ATENDIMENTO 1X0,60" in equipamentos_salvos %}checked{% endif %}> BALCÃO DE ATENDIMENTO 1X0,60</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="BALCÃO DE ATENDIMENTO 1,50X0,60" {% if "BALCÃO DE ATENDIMENTO 1,50X0,60" in equipamentos_salvos %}checked{% endif %}> BALCÃO DE ATENDIMENTO 1,50X0,60</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="3 ESTANTES" {% if "3 ESTANTES" in equipamentos_salvos %}checked{% endif %}> 3 ESTANTES</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="FECHAMENTO" {% if "FECHamento" in equipamentos_salvos or "FECHAMENTO" in equipamentos_salvos %}checked{% endif %}> FECHAMENTO</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="RAMPA" {% if "RAMPA" in equipamentos_salvos %}checked{% endif %}> RAMPA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="ESCADA" {% if "ESCADA" in equipamentos_salvos %}checked{% endif %}> ESCADA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="GRADIL" {% if "GRADIL" in equipamentos_salvos %}checked{% endif %}> GRADIL</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="GRID P 30" {% if "GRID P 30" in equipamentos_salvos %}checked{% endif %}> GRID P 30</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="GRID P 50" {% if "GRID P 50" in equipamentos_salvos %}checked{% endif %}> GRID P 50</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="DISCIPLINADORES DE FILA" {% if "DISCIPLINADORES DE FILA" in equipamentos_salvos %}checked{% endif %}> DISCIPLINADORES DE FILA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="CONJUNTO BARRICADA" {% if "CONJUNTO BARRICADA" in equipamentos_salvos %}checked{% endif %}> CONJUNTO BARRICADA</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="PALANQUES" {% if "PALANQUES" in equipamentos_salvos %}checked{% endif %}> PALANQUES</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="WC STAND" {% if "WC STAND" in equipamentos_salvos %}checked{% endif %}> WC STAND</label>
-                <label class="equipamento-item"><input type="checkbox" name="equipamentos" value="WC PNE" {% if "WC PNE" in equipamentos_salvos %}checked{% endif %}> WC PNE</label>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="SOM PALESTRA" {% if "SOM PALESTRA" in equipamentos_salvos %}checked{% endif %}> SOM PALESTRA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="SOM PALESTRA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="SOM COM ILUMINAÇÃO" {% if "SOM COM ILUMINAÇÃO" in equipamentos_salvos %}checked{% endif %}> SOM COM ILUMINAÇÃO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="SOM COM ILUMINAÇÃO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="SOM DE GRANDE PORTE" {% if "SOM DE GRANDE PORTE" in equipamentos_salvos %}checked{% endif %}> SOM DE GRANDE PORTE</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="SOM DE GRANDE PORTE">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PALCO" {% if "PALCO" in equipamentos_salvos or "palco" in equipamentos_salvos %}checked{% endif %}> PALCO</label> {# Ajustado para "PALCO" #}
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PALCO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="LUZ" {% if "LUZ" in equipamentos_salvos or "luz" in equipamentos_salvos %}checked{% endif %}> LUZ</label> {# Ajustado para "LUZ" #}
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="LUZ">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="FUMAÇA" {% if "FUMAÇA" in equipamentos_salvos or "fumaça" in equipamentos_salvos %}checked{% endif %}> FUMAÇA</label> {# Ajustado para "FUMAÇA" #}
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="FUMAÇA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PISO - PALCO" {% if "PISO - PALCO" in equipamentos_salvos %}checked{% endif %}> PISO - PALCO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PISO - PALCO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PISO - LINÓLEO" {% if "PISO - LINÓLEO" in equipamentos_salvos %}checked{% endif %}> PISO - LINÓLEO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PISO - LINÓLEO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PISO - PLATAFORMA PANTOGRÁFICA" {% if "PISO - PLATAFORMA PANTOGRÁFICA" in equipamentos_salvos %}checked{% endif %}> PISO - PLATAFORMA PANTOGRÁFICA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PISO - PLATAFORMA PANTOGRÁFICA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PULA PULA" {% if "PULA PULA" in equipamentos_salvos %}checked{% endif %}> PULA PULA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PULA PULA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PISCINA DE BOLAS" {% if "PISCINA DE BOLAS" in equipamentos_salvos %}checked{% endif %}> PISCINA DE BOLAS</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PISCINA DE BOLAS">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="CAMA ELÁSTICA" {% if "CAMA ELÁSTICA" in equipamentos_salvos %}checked{% endif %}> CAMA ELÁSTICA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="CAMA ELÁSTICA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="TOBOGÃ" {% if "TOBOGÃ" in equipamentos_salvos %}checked{% endif %}> TOBOGÃ</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="TOBOGÃ">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="EURO BUNGUY 1 EM 1" {% if "EURO BUNGUY 1 EM 1" in equipamentos_salvos %}checked{% endif %}> EURO BUNGUY 1 EM 1</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="EURO BUNGUY 1 EM 1">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="EURO BUNGUY 4 EM 1" {% if "EURO BUNGUY 4 EM 1" in equipamentos_salvos %}checked{% endif %}> EURO BUNGUY 4 EM 1</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="EURO BUNGUY 4 EM 1">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="TOURO MECANICO" {% if "TOURO MECANICO" in equipamentos_salvos %}checked{% endif %}> TOURO MECANICO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="TOURO MECANICO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="LOCONAUTA / GIROSCÓPIO" {% if "LOCONAUTA / GIROSCÓPIO" in equipamentos_salvos %}checked{% endif %}> LOCONAUTA / GIROSCÓPIO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="LOCONAUTA / GIROSCÓPIO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="RECREADORES" {% if "RECREADORES" in equipamentos_salvos %}checked{% endif %}> RECREADORES</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="RECREADORES">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="KID PLAY" {% if "KID PLAY" in equipamentos_salvos %}checked{% endif %}> KID PLAY</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="KID PLAY">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="MURO DE ESCALADA" {% if "MURO DE ESCALADA" in equipamentos_salvos %}checked{% endif %}> MURO DE ESCALADA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="MURO DE ESCALADA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GERADOR 55 KVA" {% if "GERADOR 55 KVA" in equipamentos_salvos %}checked{% endif %}> GERADOR 55 KVA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="GERADOR 55 KVA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GERADOR 100 KVA" {% if "GERADOR 100 KVA" in equipamentos_salvos %}checked{% endif %}> GERADOR 100 KVA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="GERADOR 100 KVA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GERADOR 180 KVA" {% if "GERADOR 180 KVA" in equipamentos_salvos %}checked{% endif %}> GERADOR 180 KVA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="GERADOR 180 KVA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="TENDA 5X5 MODELO PIRAMIDE" {% if "TENDA 5X5 MODELO PIRAMIDE" in equipamentos_salvos %}checked{% endif %}> TENDA 5X5 MODELO PIRAMIDE</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="TENDA 5X5 MODELO PIRAMIDE">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="TENDA 5X5 MODELO CHAPEU DE BRUXA" {% if "TENDA 5X5 MODELO CHAPEU DE BRUXA" in equipamentos_salvos %}checked{% endif %}> TENDA 5X5 MODELO CHAPEU DE BRUXA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="TENDA 5X5 MODELO CHAPEU DE BRUXA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="TENDA 10X10" {% if "TENDA 10X10" in equipamentos_salvos %}checked{% endif %}> TENDA 10X10</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="TENDA 10X10">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PAVILHÃO 10X10" {% if "PAVILHÃO 10X10" in equipamentos_salvos %}checked{% endif %}> PAVILHÃO 10X10</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PAVILHÃO 10X10">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="CACHEPOT DE MADEIRA" {% if "CACHEPOT DE MADEIRA" in equipamentos_salvos %}checked{% endif %}> CACHEPOT DE MADEIRA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="CACHEPOT DE MADEIRA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="BANQUETA ALTA EM PINUS" {% if "BANQUETA ALTA EM PINUS" in equipamentos_salvos %}checked{% endif %}> BANQUETA ALTA EM PINUS</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="BANQUETA ALTA EM PINUS">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="MESA ALTA REDONDA OU QUADRADA" {% if "MESA ALTA REDONDA OU QUADRADA" in equipamentos_salvos %}checked{% endif %}> MESA ALTA REDONDA OU QUADRADA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="MESA ALTA REDONDA OU QUADRADA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="BANCO EM MADEIRA" {% if "BANCO EM MADEIRA" in equipamentos_salvos %}checked{% endif %}> BANCO EM MADEIRA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="BANCO EM MADEIRA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="MESA BAIXA COM 4 BANCOS" {% if "MESA BAIXA COM 4 BANCOS" in equipamentos_salvos %}checked{% endif %}> MESA BAIXA COM 4 BANCOS</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="MESA BAIXA COM 4 BANCOS">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="CADEIRA AÇO" {% if "CADEIRA AÇO" in equipamentos_salvos %}checked{% endif %}> CADEIRA AÇO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="CADEIRA AÇO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="CADEIRA BOTECO" {% if "CADEIRA BOTECO" in equipamentos_salvos %}checked{% endif %}> CADEIRA BOTECO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="CADEIRA BOTECO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="MESA BOTECO" {% if "MESA BOTECO" in equipamentos_salvos %}checked{% endif %}> MESA BOTECO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="MESA BOTECO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GAVETEIRO MDF" {% if "GAVETEIRO MDF" in equipamentos_salvos %}checked{% endif %}> GAVETEIRO MDF</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="GAVETEIRO MDF">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PUF" {% if "PUF" in equipamentos_salvos %}checked{% endif %}> PUF</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PUF">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="MESA ESTAÇÃO DE TRABALHO" {% if "MESA ESTAÇÃO DE TRABALHO" in equipamentos_salvos %}checked{% endif %}> MESA ESTAÇÃO DE TRABALHO</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="MESA ESTAÇÃO DE TRABALHO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="MESA GRANDE RETANGULAR 8 LUGARES" {% if "MESA GRANDE RETANGULAR 8 LUGARES" in equipamentos_salvos %}checked{% endif %}> MESA GRANDE RETANGULAR 8 LUGARES</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="MESA GRANDE RETANGULAR 8 LUGARES">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="BALCÃO DE ATENDIMENTO 1X0,60" {% if "BALCÃO DE ATENDIMENTO 1X0,60" in equipamentos_salvos %}checked{% endif %}> BALCÃO DE ATENDIMENTO 1X0,60</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="BALCÃO DE ATENDIMENTO 1X0,60">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="BALCÃO DE ATENDIMENTO 1,50X0,60" {% if "BALCÃO DE ATENDIMENTO 1,50X0,60" in equipamentos_salvos %}checked{% endif %}> BALCÃO DE ATENDIMENTO 1,50X0,60</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="BALCÃO DE ATENDIMENTO 1,50X0,60">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="3 ESTANTES" {% if "3 ESTANTES" in equipamentos_salvos %}checked{% endif %}> 3 ESTANTES</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="3 ESTANTES">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="FECHAMENTO" {% if "FECHAMENTO" in equipamentos_salvos or "FECHamento" in equipamentos_salvos %}checked{% endif %}> FECHAMENTO</label> {# Ajustado para "FECHAMENTO" #}
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="FECHAMENTO">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="RAMPA" {% if "RAMPA" in equipamentos_salvos %}checked{% endif %}> RAMPA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="RAMPA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="ESCADA" {% if "ESCADA" in equipamentos_salvos %}checked{% endif %}> ESCADA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="ESCADA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GRADIL" {% if "GRADIL" in equipamentos_salvos %}checked{% endif %}> GRADIL</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="GRADIL">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GRID P 30" {% if "GRID P 30" in equipamentos_salvos %}checked{% endif %}> GRID P 30</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="GRID P 30">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GRID P 50" {% if "GRID P 50" in equipamentos_salvos %}checked{% endif %}> GRID P 50</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="GRID P 50">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="DISCIPLINADORES DE FILA" {% if "DISCIPLINADORES DE FILA" in equipamentos_salvos %}checked{% endif %}> DISCIPLINADORES DE FILA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="DISCIPLINADORES DE FILA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="CONJUNTO BARRICADA" {% if "CONJUNTO BARRICADA" in equipamentos_salvos %}checked{% endif %}> CONJUNTO BARRICADA</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="CONJUNTO BARRICADA">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="PALANQUES" {% if "PALANQUES" in equipamentos_salvos %}checked{% endif %}> PALANQUES</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="PALANQUES">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="WC STAND" {% if "WC STAND" in equipamentos_salvos %}checked{% endif %}> WC STAND</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="WC STAND">
+              </div>
+              <div class="equipamento-item-wrapper">
+                <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="WC PNE" {% if "WC PNE" in equipamentos_salvos %}checked{% endif %}> WC PNE</label>
+                <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="WC PNE">
+              </div>
               {% endwith %}
             </div>
+            <input type="hidden" name="equipamentos_data" id="equipamentos_data_hidden">
           </div>
 
           <div class="mb-2">
@@ -251,47 +430,132 @@
     <button type="submit" class="btn btn-primary">Salvar Alterações</button>
   </form>
 
+  {# !! IMPORTANTE !! Substitua YOUR_API_KEY pela sua chave real do Google Maps #}
   <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initAutocomplete" async defer></script>
 
   <script>
     function initAutocomplete() {
       const input = document.getElementById('autocomplete');
+      if (!input) return;
       const autocomplete = new google.maps.places.Autocomplete(input);
 
       autocomplete.addListener('place_changed', function () {
         const place = autocomplete.getPlace();
         if (place.geometry) {
-          document.getElementById('latitude').value = place.geometry.location.lat();
-          document.getElementById('longitude').value = place.geometry.location.lng();
+          const latInput = document.getElementById('latitude');
+          const lonInput = document.getElementById('longitude');
+          if(latInput) latInput.value = place.geometry.location.lat();
+          if(lonInput) lonInput.value = place.geometry.location.lng();
         }
       });
     }
 
-    // Script para atualizar a exibição dos equipamentos selecionados (checkboxes)
+    // Script para atualizar a exibição dos equipamentos selecionados (checkboxes com quantidade)
+    // Adaptado de cadastrar.html e modificado para editar.html
     document.addEventListener('DOMContentLoaded', function() {
         const containerCheckboxes = document.getElementById('equipamentos_checkbox_container');
         const displayEquipamentos = document.getElementById('equipamentos_selecionados_display');
+        const hiddenInputEquipamentosData = document.getElementById('equipamentos_data_hidden');
 
-        function atualizarDisplayEquipamentos() {
-            const checkboxesMarcados = containerCheckboxes.querySelectorAll('input[name="equipamentos"]:checked');
-            const selectedOptions = Array.from(checkboxesMarcados).map(cb => cb.value); 
-
-            if (selectedOptions.length > 0) {
-            displayEquipamentos.textContent = selectedOptions.join(', ');
-            } else {
-            displayEquipamentos.textContent = 'Nenhum equipamento selecionado.';
-            }
+        if (!containerCheckboxes || !displayEquipamentos || !hiddenInputEquipamentosData) {
+            // console.warn("Elementos do formulário de equipamentos não encontrados.");
+            return;
         }
 
-        if (containerCheckboxes) { // Adiciona verificação se o container existe
-            containerCheckboxes.addEventListener('change', function(event) {
-                if (event.target.type === 'checkbox' && event.target.name === 'equipamentos') {
-                atualizarDisplayEquipamentos();
+        let equipamentosSelecionadosComQuantidade = []; 
+
+        function atualizarTudo() {
+            equipamentosSelecionadosComQuantidade = [];
+            const todosCheckboxes = containerCheckboxes.querySelectorAll('.equipamento-checkbox');
+            
+            todosCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    const nomeEquipamento = checkbox.value; // Deve estar em MAIÚSCULAS
+                    const quantityInput = containerCheckboxes.querySelector(`.equipamento-quantity-input[data-equipamento="${CSS.escape(nomeEquipamento)}"]`);
+                    
+                    let quantidade = 1; 
+                    if (quantityInput) {
+                        quantidade = parseInt(quantityInput.value) || 1; 
+                    }
+                    equipamentosSelecionadosComQuantidade.push({ nome: nomeEquipamento, quantidade: quantidade });
                 }
             });
-            // Chamar a função no carregamento da página para refletir os itens já selecionados (checked)
-            atualizarDisplayEquipamentos();
+
+            if (equipamentosSelecionadosComQuantidade.length > 0) {
+                displayEquipamentos.textContent = equipamentosSelecionadosComQuantidade
+                    .map(item => `${item.quantidade} x ${item.nome}`)
+                    .join(', ');
+            } else {
+                displayEquipamentos.textContent = 'Nenhum equipamento selecionado.';
+            }
+            hiddenInputEquipamentosData.value = JSON.stringify(equipamentosSelecionadosComQuantidade);
         }
+
+        containerCheckboxes.querySelectorAll('.equipamento-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function(event) {
+                const nomeEquipamento = event.target.value; 
+                const quantityInput = event.target.closest('.equipamento-item-wrapper').querySelector(`.equipamento-quantity-input[data-equipamento="${CSS.escape(nomeEquipamento)}"]`);
+                
+                if (!quantityInput) {
+                    console.error(`Input de quantidade não encontrado para ${nomeEquipamento}.`);
+                    atualizarTudo(); 
+                    return; 
+                }
+
+                if (event.target.checked) {
+                    quantityInput.style.display = 'inline-block';
+                    // O value do quantityInput já deve estar definido pelo HTML (se pre-selecionado)
+                    // ou será 1 por padrão se o usuário acabou de marcar.
+                    // Não resetar para 1 se já tiver um valor específico carregado.
+                    if (!quantityInput.value || parseInt(quantityInput.value) < 1) {
+                         quantityInput.value = '1'; // Garante que tenha ao menos 1 ao ser marcado.
+                    }
+                } else {
+                    quantityInput.style.display = 'none'; 
+                }
+                atualizarTudo();
+            });
+
+            // Inicializar a visibilidade e valor dos inputs de quantidade para itens pre-selecionados
+            if (checkbox.checked) {
+                const nomeEquipamento = checkbox.value;
+                const quantityInput = checkbox.closest('.equipamento-item-wrapper').querySelector(`.equipamento-quantity-input[data-equipamento="${CSS.escape(nomeEquipamento)}"]`);
+                if (quantityInput) {
+                    quantityInput.style.display = 'inline-block';
+                    // O valor é definido no HTML. Se `equipamentos_do_evento_lista` não vier com quantidades,
+                    // o value="1" no HTML do input de quantidade será usado.
+                    // Se você passar quantidades do backend, o HTML deve refletir isso.
+                    // Certificar que o valor é no mínimo 1.
+                    if (!quantityInput.value || parseInt(quantityInput.value) < 1) {
+                        quantityInput.value = '1';
+                    }
+                }
+            } else { // Garante que os não checados tenham input de quantidade escondido
+                 const nomeEquipamento = checkbox.value;
+                 const quantityInput = checkbox.closest('.equipamento-item-wrapper').querySelector(`.equipamento-quantity-input[data-equipamento="${CSS.escape(nomeEquipamento)}"]`);
+                 if(quantityInput) {
+                    quantityInput.style.display = 'none';
+                 }
+            }
+        });
+
+        containerCheckboxes.querySelectorAll('.equipamento-quantity-input').forEach(quantityInput => {
+            quantityInput.addEventListener('input', function(event) {
+                if (parseInt(event.target.value) < 1 && event.target.value !== "") { 
+                    event.target.value = '1';
+                }
+                atualizarTudo();
+            });
+            quantityInput.addEventListener('blur', function(event) { 
+                if (!event.target.value || parseInt(event.target.value) < 1 ) {
+                    event.target.value = '1'; 
+                    atualizarTudo();
+                }
+            });
+        });
+        
+        // Chamada inicial para garantir que o display e o campo hidden estejam corretos
+        atualizarTudo(); 
     });
   </script>
 </div>
