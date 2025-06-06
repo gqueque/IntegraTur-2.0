@@ -157,118 +157,59 @@ def mapa(request):
     eventos_json = json.dumps(eventos_list, cls=DjangoJSONEncoder)
     return render(request, 'cadastro_evento/mapa.html', {'eventos_json': eventos_json})
 
-
 def editar_evento(request, id):
-    evento_obj = get_object_or_404(Evento, id=id)
+    evento = get_object_or_404(Evento, id=id)
     
-    # Para o GET (mostrar o formulário): Preparar os dados dos equipamentos existentes
-    # para preencher checkboxes E QUANTIDADES no template de edição.
-    equipamentos_data_for_template = [] # Será uma lista de dicts: [{'nome': 'X', 'quantidade': Y}]
-    
-    if evento_obj.equipamento: # evento_obj.equipamento é uma string JSON
-        try:
-            parsed_equipamentos = json.loads(evento_obj.equipamento)
-            if isinstance(parsed_equipamentos, list):
-                equipamentos_data_for_template = parsed_equipamentos # Passa a lista de dicts completa
-        except json.JSONDecodeError:
-            # Fallback se o dado for antigo e não JSON (improvável se a criação já salva JSON)
-            # Esta lógica pode ser simplificada ou removida se todos os dados já são JSON.
-            if isinstance(evento_obj.equipamento, str):
-                # Tenta converter um formato antigo "Nome1, Nome2" para o novo com quantidade 1
-                nomes_antigos = [e.strip() for e in evento_obj.equipamento.split(',') if e.strip()]
-                equipamentos_data_for_template = [{"nome": nome, "quantidade": 1} for nome in nomes_antigos]
-            messages.warning(request, f"Campo 'equipamento' para o evento ID {id} não era JSON válido. Tentativa de conversão.")
-
     if request.method == 'POST':
-        # Coleta e atribuição de todos os campos (como na sua última versão da view)
-        evento_obj.titulo = request.POST.get('titulo', evento_obj.titulo)
-        evento_obj.responsavel = request.POST.get('responsavel', evento_obj.responsavel)
-        evento_obj.local = request.POST.get('local', evento_obj.local)
-        evento_obj.descricao = request.POST.get('descricao', evento_obj.descricao)
-        
-        data_str_post = request.POST.get('data')
-        if data_str_post:
-            try:
-                evento_obj.data = datetime.strptime(data_str_post, '%Y-%m-%d').date()
-            except ValueError:
-                messages.error(request, "Formato de data inválido. Data não alterada.")
-        
-        evento_obj.marketing = request.POST.get('marketing', evento_obj.marketing)
-
-        orcamento_str_post = request.POST.get('orcamento_estimado') # Valor do input hidden 'orcamento_real'
-        if orcamento_str_post and orcamento_str_post.strip():
-            try:
-                evento_obj.orcamento_estimado = float(orcamento_str_post)
-            except ValueError:
-                messages.error(request, "Valor inválido para Orçamento Estimado. Valor não alterado.")
-        elif orcamento_str_post is not None and not orcamento_str_post.strip(): # Se enviado como string vazia
-             evento_obj.orcamento_estimado = None
-
-
-        programacao_post_str = request.POST.get('programacao', evento_obj.programacao) # Default para valor antigo se não enviado
-        # Assume que Evento.programacao é JSONField ou você quer salvar o objeto Python
-        # Se for CharField/TextField para string JSON, use json.dumps()
         try:
-            # Se programacao_post_str for uma string JSON válida, json.loads a converterá.
-            # Se já for um objeto Python (improvável de POST direto), pode causar erro se não for string.
-            # Garanta que o que vem do POST seja tratado como string para json.loads.
-            if isinstance(programacao_post_str, str):
-                 evento_obj.programacao = json.loads(programacao_post_str or '[]') # Default para lista vazia se string for vazia
-            # else: evento_obj.programacao = programacao_post_str # Se já for o tipo correto
-        except json.JSONDecodeError:
-            # Se não for JSON, e Evento.programacao for JSONField, isso pode dar erro no save()
-            # Se for TextField, você pode querer salvar a string como está, ou uma lista vazia.
-            evento_obj.programacao = [] 
-            messages.warning(request, "Formato da programação inválido, salvo como lista vazia.")
-        
-        # Processar equipamentos_data (JSON string do input hidden)
-        equipamentos_data_json_string_post = request.POST.get('equipamentos_data')
-        if equipamentos_data_json_string_post:
-            # Se Evento.equipamento é CharField/TextField, salva a string JSON
-            evento_obj.equipamento = equipamentos_data_json_string_post
-            # Se Evento.equipamento é JSONField, você salvaria o objeto Python:
-            # try:
-            #     evento_obj.equipamento = json.loads(equipamentos_data_json_string_post)
-            # except json.JSONDecodeError:
-            #     messages.error(request, "Erro ao processar dados dos equipamentos para salvar.")
-            #     # Não altera o campo equipamento se o JSON for inválido (ele manterá o valor antigo)
-        else: # Se nenhum dado de equipamento for enviado (ex: todos desmarcados)
-            evento_obj.equipamento = "" # Ou "[]" se preferir uma string JSON de array vazio
-            # Para JSONField: evento_obj.equipamento = []
+            # Campos básicos
+            evento.titulo = request.POST.get('titulo', evento.titulo)
+            evento.responsavel = request.POST.get('responsavel', evento.responsavel)
+            evento.local = request.POST.get('local', evento.local)
+            evento.descricao = request.POST.get('descricao', evento.descricao)
+            
+            # Data
+            if request.POST.get('data'):
+                try:
+                    evento.data = datetime.strptime(request.POST['data'], '%Y-%m-%d').date()
+                except ValueError:
+                    messages.error(request, "Formato de data inválido")
 
-        evento_obj.fornecedores = request.POST.get('fornecedores', evento_obj.fornecedores)
-        evento_obj.patrocinadores = request.POST.get('patrocinadores', evento_obj.patrocinadores)
-        evento_obj.contratacoes = request.POST.get('contratacoes', evento_obj.contratacoes)
-        evento_obj.estruturas = request.POST.get('estruturas', evento_obj.estruturas)
+            # Geolocalização
+            if request.POST.get('latitude') and request.POST.get('longitude'):
+                try:
+                    evento.latitude = float(request.POST['latitude'])
+                    evento.longitude = float(request.POST['longitude'])
+                except ValueError:
+                    messages.warning(request, "Coordenadas inválidas - mantendo as anteriores")
 
-        lat_str_post = request.POST.get('latitude')
-        lon_str_post = request.POST.get('longitude')
-        
-        if lat_str_post and lat_str_post.strip(): # Se não vazio
-            try: evento_obj.latitude = float(lat_str_post.replace(',', '.'))
-            except ValueError: messages.error(request, "Valor de latitude inválido. Valor não alterado.")
-        elif lat_str_post is not None and not lat_str_post.strip(): # Se explicitamente vazio
-            evento_obj.latitude = None 
-        
-        if lon_str_post and lon_str_post.strip(): # Se não vazio
-            try: evento_obj.longitude = float(lon_str_post.replace(',', '.'))
-            except ValueError: messages.error(request, "Valor de longitude inválido. Valor não alterado.")
-        elif lon_str_post is not None and not lon_str_post.strip(): # Se explicitamente vazio
-            evento_obj.longitude = None
+            # Equipamentos (JSON)
+            equipamentos_data = request.POST.get('equipamentos_data', '[]')
+            try:
+                evento.equipamento = json.loads(equipamentos_data)
+            except json.JSONDecodeError:
+                messages.error(request, "Formato de equipamentos inválido")
 
-        if request.FILES.get('imagem'): # Apenas atualiza se uma nova imagem for enviada
-            evento_obj.imagem = request.FILES.get('imagem')
+            # Imagem (se enviada)
+            if 'imagem' in request.FILES:
+                evento.imagem = request.FILES['imagem']
 
-        evento_obj.save() # ESSENCIAL PARA PERSISTIR AS ALTERAÇÕES
-        messages.success(request, 'Evento atualizado com sucesso!')
-        return redirect('home')
+            evento.save()
+            messages.success(request, 'Evento atualizado com sucesso!')
+            return redirect('home')
 
-    context = {
-        'evento': evento_obj,
-        # Passa a LISTA DE OBJETOS com nome e quantidade para o template de edição
-        'equipamentos_data_do_evento': equipamentos_data_for_template, 
-    }
-    return render(request, 'cadastro_evento/editar.html', context)
+        except Exception as e:
+            messages.error(request, f'Erro ao atualizar evento: {str(e)}')
+            return redirect('editar_evento', id=evento.id)
+
+    # Prepara os dados para o template
+    equipamentos_data = evento.equipamento if evento.equipamento else []
+    
+    return render(request, 'cadastro_evento/editar.html', {
+        'evento': evento,
+        'equipamentos_data_do_evento': equipamentos_data,
+        'data_formatada': evento.data.strftime('%Y-%m-%d') if evento.data else '',
+    })
 
 def excluir_evento(request, id):
     evento_obj = get_object_or_404(Evento, id=id)
@@ -278,11 +219,9 @@ def excluir_evento(request, id):
         return redirect('home')
     return render(request, 'cadastro_evento/excluir_confirmacao.html', {'evento': evento_obj})
 
-
 def calendario_view(request):
     eventos_calendario = Evento.objects.all().order_by('data')
     return render(request, 'cadastro_evento/calendario.html', {'eventos': eventos_calendario})
-
 
 def events_json(request):
     eventos_all = Evento.objects.all()

@@ -81,7 +81,7 @@
     <div id="progress-label" class="progress-label">0% completo</div>
   </div>
 
-  <form action="" method="post" enctype="multipart/form-data">
+  <form action="{% url 'editar_evento' evento.id %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="row">
       <div class="col-md-6">
@@ -406,147 +406,204 @@
     </div>
   </form>
 
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initAutocomplete" async defer></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&callback=initAutocomplete" async defer></script>
 
-  <script>
-    // Script do Autocomplete do Google
-    function initAutocomplete() {
-      const input = document.getElementById('autocomplete');
-      if (!input) return;
-      const autocomplete = new google.maps.places.Autocomplete(input);
-
-      autocomplete.addListener('place_changed', function () {
+<script>
+// Função para inicializar o autocomplete do Google Maps
+function initAutocomplete() {
+    const input = document.getElementById('autocomplete');
+    if (!input) return;
+    
+    const autocomplete = new google.maps.places.Autocomplete(input, {
+        types: ['establishment', 'geocode'],
+        componentRestrictions: {country: 'br'}
+    });
+    
+    autocomplete.addListener('place_changed', function() {
         const place = autocomplete.getPlace();
         if (place.geometry) {
-          const latInput = document.getElementById('latitude');
-          const lonInput = document.getElementById('longitude');
-          if (latInput) latInput.value = place.geometry.location.lat();
-          if (lonInput) lonInput.value = place.geometry.location.lng();
+            document.getElementById('latitude').value = place.geometry.location.lat();
+            document.getElementById('longitude').value = place.geometry.location.lng();
         }
-      });
-    }
-
-    // Script principal da página, agora com a lógica da barra de progresso
-    document.addEventListener('DOMContentLoaded', function() {
-      // Lógica do orçamento
-      const orcamentoMascara = document.getElementById('orcamento_mascara');
-      const orcamentoReal = document.getElementById('orcamento_real');
-      if (orcamentoMascara && orcamentoReal) {
-          if (orcamentoReal.value && !isNaN(parseFloat(orcamentoReal.value))) {
-             let valorNumerico = parseFloat(orcamentoReal.value);
-             let valorInicial = valorNumerico.toFixed(2).replace('.', '');
-             if (valorInicial.length < 3) valorInicial = valorInicial.padStart(3, '0');
-             let integer = valorInicial.slice(0, -2) || "0";
-             if (integer === "" && valorNumerico < 1 && valorNumerico > 0) integer = "0";
-             let decimal = valorInicial.slice(-2);
-             let formatted = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + decimal;
-             orcamentoMascara.value = 'R$ ' + formatted;
-          } else if (orcamentoReal.value === '0' || orcamentoReal.value === '0.0' || orcamentoReal.value === '0.00') {
-              orcamentoMascara.value = 'R$ 0,00';
-          }
-
-          orcamentoMascara.addEventListener('input', function(e) {
-              let value = e.target.value.replace(/\D/g, '');
-              value = value.replace(/^0+/, '');
-              if (value.length === 0) {
-                  orcamentoReal.value = ''; e.target.value = ''; return;
-              }
-              if (value.length < 3) value = value.padStart(3, '0');
-              let integer = value.slice(0, -2) || "0";
-              let decimal = value.slice(-2);
-              let formatted = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + decimal;
-              e.target.value = 'R$ ' + formatted;
-              orcamentoReal.value = (parseInt(value) / 100).toFixed(2);
-          });
-      }
-
-      // --- LÓGICA DA BARRA DE PROGRESSO ADICIONADA ---
-      const progressBar = document.getElementById('progress-bar');
-      const progressLabel = document.getElementById('progress-label');
-      const formInputs = document.querySelectorAll('.progress-input');
-      const totalFields = formInputs.length;
-
-      function updateProgress() {
-          if (!progressBar || !progressLabel) return;
-          let filledFields = 0;
-          formInputs.forEach(input => {
-              if (input.type === 'file') {
-                  if (input.files.length > 0 || document.getElementById('current-event-image')) {
-                      filledFields++;
-                  }
-              } else if (input.id === 'equipamentos_data_hidden') {
-                  if (input.value && input.value !== '[]') filledFields++;
-              } else {
-                  if (input.value && input.value.trim() !== '') {
-                      filledFields++;
-                  }
-              }
-          });
-          const percentage = totalFields > 0 ? (filledFields / totalFields) * 100 : 0;
-          progressBar.style.width = percentage + '%';
-          progressLabel.textContent = Math.round(percentage) + '% completo';
-      }
-
-      formInputs.forEach(input => {
-          const eventType = (input.tagName.toLowerCase() === 'select' || input.type === 'date' || input.type === 'file') ? 'change' : 'input';
-          input.addEventListener(eventType, updateProgress);
-      });
-      // --- FIM DA LÓGICA DA BARRA DE PROGRESSO ---
-
-      // Lógica original dos equipamentos
-      const containerCheckboxes = document.getElementById('equipamentos_checkbox_container');
-      const displayEquipamentos = document.getElementById('equipamentos_selecionados_display');
-      const hiddenInputEquipamentosData = document.getElementById('equipamentos_data_hidden');
-
-      if (!containerCheckboxes || !displayEquipamentos || !hiddenInputEquipamentosData) {
-          updateProgress();
-          return;
-      }
-
-      function atualizarTudoEquipamentos() {
-          let equipamentosSelecionadosComQuantidade = [];
-          const todosCheckboxes = containerCheckboxes.querySelectorAll('.equipamento-checkbox');
-          todosCheckboxes.forEach(checkbox => {
-              if (checkbox.checked) {
-                  const nomeEquipamento = checkbox.value;
-                  const quantityInput = checkbox.closest('.equipamento-item-wrapper').querySelector('.equipamento-quantity-input');
-                  let quantidade = (quantityInput) ? parseInt(quantityInput.value) || 1 : 1;
-                  equipamentosSelecionadosComQuantidade.push({ nome: nomeEquipamento, quantidade: quantidade });
-              }
-          });
-          displayEquipamentos.textContent = equipamentosSelecionadosComQuantidade.length > 0
-              ? equipamentosSelecionadosComQuantidade.map(item => `${item.quantidade} x ${item.nome}`).join(', ')
-              : 'Nenhum equipamento selecionado.';
-          hiddenInputEquipamentosData.value = JSON.stringify(equipamentosSelecionadosComQuantidade);
-          updateProgress();
-      }
-      
-      containerCheckboxes.querySelectorAll('.equipamento-checkbox').forEach(checkbox => {
-          const quantityInput = checkbox.closest('.equipamento-item-wrapper').querySelector('.equipamento-quantity-input');
-          if (checkbox.checked) {
-              quantityInput.style.display = 'inline-block';
-          }
-          checkbox.addEventListener('change', function(event) {
-              const currentQuantityInput = event.target.closest('.equipamento-item-wrapper').querySelector('.equipamento-quantity-input');
-              currentQuantityInput.style.display = event.target.checked ? 'inline-block' : 'none';
-              if(event.target.checked) currentQuantityInput.value = '1';
-              atualizarTudoEquipamentos();
-          });
-      });
-
-      containerCheckboxes.querySelectorAll('.equipamento-quantity-input').forEach(quantityInput => {
-          quantityInput.addEventListener('input', atualizarTudoEquipamentos);
-          quantityInput.addEventListener('blur', function(event) {
-              if (!event.target.value || parseInt(event.target.value) < 1) {
-                  event.target.value = '1';
-                  atualizarTudoEquipamentos();
-              }
-          });
-      });
-
-      // Chamada inicial para configurar o estado da página
-      atualizarTudoEquipamentos();
     });
-  </script>
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos principais
+    const containerCheckboxes = document.getElementById('equipamentos_checkbox_container');
+    const displayEquipamentos = document.getElementById('equipamentos_selecionados_display');
+    const hiddenInputEquipamentosData = document.getElementById('equipamentos_data_hidden');
+    
+    // 1. Função principal para atualizar todos os equipamentos
+    function atualizarTudoEquipamentos() {
+        // Coletar equipamentos selecionados
+        const equipamentosSelecionados = [];
+        let hasInvalidQuantity = false;
+        
+        containerCheckboxes.querySelectorAll('.equipamento-checkbox:checked').forEach(checkbox => {
+            const nome = checkbox.value;
+            const wrapper = checkbox.closest('.equipamento-item-wrapper');
+            const qtdInput = wrapper.querySelector('.equipamento-quantity-input');
+            
+            // Validar quantidade
+            let quantidade = parseInt(qtdInput.value) || 1;
+            if (quantidade < 1) {
+                quantidade = 1;
+                qtdInput.value = '1';
+                hasInvalidQuantity = true;
+            }
+            
+            equipamentosSelecionados.push({
+                nome: nome,
+                quantidade: quantidade
+            });
+        });
+        
+        // Atualizar display
+        displayEquipamentos.textContent = equipamentosSelecionados.length > 0
+            ? equipamentosSelecionados.map(e => `${e.quantidade}x ${e.nome}`).join(', ')
+            : 'Nenhum equipamento selecionado';
+        
+        // Atualizar input hidden
+        hiddenInputEquipamentosData.value = JSON.stringify(equipamentosSelecionados);
+        
+        // Atualizar progresso
+        if (typeof updateProgress === 'function') {
+            updateProgress();
+        }
+        
+        if (hasInvalidQuantity) {
+            alert('Quantidades inválidas foram ajustadas para 1');
+        }
+    }
+    
+    // 2. Inicializar equipamentos existentes
+    function inicializarEquipamentos() {
+        try {
+            const equipamentosSalvos = JSON.parse(hiddenInputEquipamentosData.value || '[]');
+            
+            equipamentosSalvos.forEach(equip => {
+                const checkbox = containerCheckboxes.querySelector(
+                    `.equipamento-checkbox[value="${equip.nome}"]`
+                );
+                
+                if (checkbox) {
+                    checkbox.checked = true;
+                    const qtdInput = checkbox.closest('.equipamento-item-wrapper')
+                                          .querySelector('.equipamento-quantity-input');
+                    qtdInput.style.display = 'inline-block';
+                    qtdInput.value = equip.quantidade || 1;
+                }
+            });
+        } catch (e) {
+            console.error('Erro ao carregar equipamentos:', e);
+        }
+        atualizarTudoEquipamentos();
+    }
+    
+    // 3. Configurar eventos
+    function configurarEventListeners() {
+        // Eventos para checkboxes
+        containerCheckboxes.querySelectorAll('.equipamento-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const qtdInput = this.closest('.equipamento-item-wrapper')
+                                   .querySelector('.equipamento-quantity-input');
+                qtdInput.style.display = this.checked ? 'inline-block' : 'none';
+                atualizarTudoEquipamentos();
+            });
+        });
+        
+        // Eventos para inputs de quantidade
+        containerCheckboxes.querySelectorAll('.equipamento-quantity-input').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value < 1 && this.value !== "") {
+                    this.value = '1';
+                }
+                atualizarTudoEquipamentos();
+            });
+            
+            input.addEventListener('blur', function() {
+                if (!this.value || parseInt(this.value) < 1) {
+                    this.value = '1';
+                    atualizarTudoEquipamentos();
+                }
+            });
+        });
+    }
+    
+    // 4. Lógica do orçamento (formatação monetária)
+    const orcamentoMascara = document.getElementById('orcamento_mascara');
+    const orcamentoReal = document.getElementById('orcamento_real');
+    
+    if (orcamentoMascara && orcamentoReal) {
+        // Formatar valor inicial se existir
+        if (orcamentoReal.value && parseFloat(orcamentoReal.value) > 0) {
+            const valor = parseFloat(orcamentoReal.value).toFixed(2);
+            orcamentoMascara.value = 'R$ ' + valor.replace('.', ',')
+                                               .replace(/(\d)(?=(\d{3})+\,)/g, '$1.');
+        }
+        
+        // Evento de formatação ao digitar
+        orcamentoMascara.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/^0+/, '');
+            
+            if (value.length === 0) {
+                orcamentoReal.value = '';
+                e.target.value = '';
+                return;
+            }
+            
+            if (value.length < 3) value = value.padStart(3, '0');
+            
+            const integer = value.slice(0, -2) || "0";
+            const decimal = value.slice(-2);
+            const formatted = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + decimal;
+            
+            e.target.value = 'R$ ' + formatted;
+            orcamentoReal.value = (parseInt(value) / 100).toFixed(2);
+        });
+    }
+    
+    // 5. Barra de progresso
+    function updateProgress() {
+        const progressBar = document.getElementById('progress-bar');
+        const progressLabel = document.getElementById('progress-label');
+        const formInputs = document.querySelectorAll('.progress-input');
+        
+        if (!progressBar || !progressLabel) return;
+        
+        let filledFields = 0;
+        formInputs.forEach(input => {
+            if (input.type === 'file') {
+                if (input.files.length > 0 || document.getElementById('current-event-image')) {
+                    filledFields++;
+                }
+            } else if (input.value && input.value.trim() !== '') {
+                filledFields++;
+            }
+        });
+        
+        const percentage = Math.round((filledFields / formInputs.length) * 100);
+        progressBar.style.width = percentage + '%';
+        progressLabel.textContent = percentage + '% completo';
+    }
+    
+    // Inicializar tudo
+    if (containerCheckboxes && displayEquipamentos && hiddenInputEquipamentosData) {
+        configurarEventListeners();
+        inicializarEquipamentos();
+    }
+    
+    // Configurar event listeners para a barra de progresso
+    document.querySelectorAll('.progress-input').forEach(input => {
+        const eventType = input.tagName === 'SELECT' || input.type === 'file' ? 'change' : 'input';
+        input.addEventListener(eventType, updateProgress);
+    });
+    
+    // Atualizar progresso inicial
+    updateProgress();
+});
+</script>
 </div>
 {% endblock %}
