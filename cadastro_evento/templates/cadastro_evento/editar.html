@@ -3,13 +3,33 @@
 
 {% block conteudo %}
 <style>
-  /* Este CSS irá esconder os links de navegação no cabeçalho. */
-  /* Ele assume que os links usam a classe .navbar-nav do Bootstrap. */
+  /* --- ESTILOS ADICIONADOS PARA BARRA DE PROGRESSO --- */
+  .progress-container {
+    margin-bottom: 1.5rem;
+  }
+  .progress-bar-wrapper {
+    background-color: #e9ecef;
+    border-radius: .25rem;
+    height: 8px;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    background-color: #0d6efd;
+    height: 100%;
+    width: 0%; /* Inicia em 0, mas o script atualiza no load */
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    text-align: right;
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 2px;
+  }
+
+  /* --- ESTILOS ORIGINAIS DO SEU CÓDIGO --- */
   .navbar-nav {
     display: none !important;
   }
-
-  /* Estilos para a área dos checkboxes de equipamentos */
   .equipamentos-checkbox-container {
     max-height: 250px;
     overflow-y: auto;
@@ -17,25 +37,20 @@
     padding: 10px;
     border-radius: 3px;
   }
-
-  /* Estilos para o item de equipamento e input de quantidade */
   .equipamento-item-wrapper {
     display: flex;
     align-items: center;
     margin-bottom: 8px;
   }
-
   .equipamento-item-label {
     display: flex;
     align-items: center;
     cursor: pointer;
     flex-grow: 1;
   }
-
   .equipamento-item-label input[type="checkbox"] {
     margin-right: 8px;
   }
-
   .equipamento-quantity-input {
     width: 60px;
     padding: 2px 5px;
@@ -44,8 +59,6 @@
     border-radius: 3px;
     margin-left: 10px;
   }
-
-  /* Estilo para a área que mostra os equipamentos selecionados */
   #equipamentos_selecionados_display {
     margin-bottom: 10px;
     padding: 8px;
@@ -61,6 +74,13 @@
 <div class="content">
   <h2 class="mb-4">Editar Evento</h2>
 
+  <div class="progress-container">
+    <div class="progress-bar-wrapper">
+        <div id="progress-bar" class="progress-bar-inner"></div>
+    </div>
+    <div id="progress-label" class="progress-label">0% completo</div>
+  </div>
+
   <form action="" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="row">
@@ -70,12 +90,12 @@
 
           <div class="mb-2">
             <label class="form-label">Título</label>
-            <input name="titulo" type="text" class="form-control form-control-sm" value="{{ evento.titulo }}" required>
+            <input name="titulo" type="text" class="form-control form-control-sm progress-input" value="{{ evento.titulo }}" required>
           </div>
 
           <div class="mb-2">
             <label class="form-label">Responsável</label>
-            <select name="responsavel" class="form-select form-select-sm" required>
+            <select name="responsavel" class="form-select form-select-sm progress-input" required>
               <option value="">Selecione</option>
               <option value="Secretaria de Turismo" {% if evento.responsavel == "Secretaria de Turismo" %}selected{% endif %}>Secretaria de Turismo</option>
               <option value="Secretaria de Cultura" {% if evento.responsavel == "Secretaria de Cultura" %}selected{% endif %}>Secretaria de Cultura</option>
@@ -84,90 +104,42 @@
 
           <div class="mb-2">
             <label class="form-label">Local</label>
-            <input id="autocomplete" name="local" type="text" class="form-control form-control-sm" value="{{ evento.local }}" required>
+            <input id="autocomplete" name="local" type="text" class="form-control form-control-sm progress-input" value="{{ evento.local }}" required>
             <input type="hidden" id="latitude" name="latitude" value="{{ evento.latitude }}">
             <input type="hidden" id="longitude" name="longitude" value="{{ evento.longitude }}">
           </div>
 
           <div class="mb-2">
             <label class="form-label">Descrição</label>
-            <textarea name="descricao" class="form-control form-control-sm" rows="2">{{ evento.descricao }}</textarea>
+            <textarea name="descricao" class="form-control form-control-sm progress-input" rows="2">{{ evento.descricao }}</textarea>
           </div>
 
           <div class="mb-2">
             <label class="form-label">Data</label>
-            <input name="data" type="date" class="form-control form-control-sm" value="{{ evento.data|date:'Y-m-d' }}" required>
+            <input name="data" type="date" class="form-control form-control-sm progress-input" value="{{ evento.data|date:'Y-m-d' }}" required>
           </div>
 
           <div class="mb-2">
             <label class="form-label">Atrações</label>
-            <input name="atracoes" type="text" class="form-control form-control-sm" value="{{ evento.atracoes }}">
+            <input name="atracoes" type="text" class="form-control form-control-sm progress-input" value="{{ evento.atracoes }}">
           </div>
 
           <div class="mb-2">
             <label class="form-label">Orçamento Estimado</label>
-            <input
-              id="orcamento_mascara"
-              type="text"
-              class="form-control form-control-sm"
-              placeholder="R$ 0,00"
-              value=""> {# Value é preenchido pelo script abaixo #}
-            <input
-              id="orcamento_real"
-              name="orcamento_estimado"
-              type="hidden"
-              value="{{ evento.orcamento_estimado|default_if_none:'' }}">
+            <input id="orcamento_mascara" type="text" class="form-control form-control-sm progress-input" placeholder="R$ 0,00" value="">
+            <input id="orcamento_real" name="orcamento_estimado" type="hidden" value="{{ evento.orcamento_estimado|default_if_none:'' }}">
           </div>
-
-          <script>
-            document.addEventListener('DOMContentLoaded', function() {
-              const orcamentoMascara = document.getElementById('orcamento_mascara');
-              const orcamentoReal = document.getElementById('orcamento_real');
-
-              if (orcamentoReal.value && !isNaN(parseFloat(orcamentoReal.value))) {
-                let valorNumerico = parseFloat(orcamentoReal.value);
-                let valorInicial = valorNumerico.toFixed(2).replace('.', '');
-                if (valorInicial.length < 3) valorInicial = valorInicial.padStart(3, '0');
-
-                let integer = valorInicial.slice(0, -2) || "0";
-                if (integer === "" && valorNumerico < 1 && valorNumerico > 0) integer = "0";
-
-                let decimal = valorInicial.slice(-2);
-                let formatted = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + decimal;
-                orcamentoMascara.value = 'R$ ' + formatted;
-              } else if (orcamentoReal.value === '0' || orcamentoReal.value === '0.0' || orcamentoReal.value === '0.00') {
-                orcamentoMascara.value = 'R$ 0,00';
-              }
-
-              orcamentoMascara.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, '');
-                value = value.replace(/^0+/, '');
-                if (value.length === 0) {
-                  orcamentoReal.value = '';
-                  e.target.value = '';
-                  return;
-                }
-                if (value.length < 3) value = value.padStart(3, '0');
-
-                let integer = value.slice(0, -2) || "0";
-                let decimal = value.slice(-2);
-                let formatted = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + decimal;
-                e.target.value = 'R$ ' + formatted;
-                orcamentoReal.value = (parseInt(value) / 100).toFixed(2);
-              });
-            });
-          </script>
 
           <div class="mb-2">
             <label class="form-label">Programação</label>
-            <textarea name="programacao" class="form-control form-control-sm" rows="2">{{ evento.programacao }}</textarea>
+            <textarea name="programacao" class="form-control form-control-sm progress-input" rows="2">{{ evento.programacao }}</textarea>
           </div>
 
           <div class="mb-3">
             <label class="form-label">Imagem do Evento</label>
-            <input name="imagem" type="file" class="form-control">
+            <input name="imagem" type="file" class="form-control progress-input">
             {% if evento.imagem %}
-              <img src="{{ evento.imagem.url }}" class="img-thumbnail mt-2" width="200" alt="Imagem atual do evento">
+              <img id="current-event-image" src="{{ evento.imagem.url }}" class="img-thumbnail mt-2" width="200" alt="Imagem atual do evento">
             {% endif %}
           </div>
         </div>
@@ -324,7 +296,7 @@
                   <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="MESA BOTECO">
                 </div>
                 <div class="equipamento-item-wrapper">
-                  <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GAVETEIRO MDF" {% if "GAVETEIRO MDF" in equipamentos_salvos %}checked{% endif %}> GAVETEIRO MDF</label>
+                  <label class="equipamento-item-label"><input type="checkbox" class="equipamento-checkbox" value="GAVETEIRO MDF" {% if "GAVETeiro MDF" in equipamentos_salvos %}checked{% endif %}> GAVETEIRO MDF</label>
                   <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="GAVETEIRO MDF">
                 </div>
                 <div class="equipamento-item-wrapper">
@@ -393,17 +365,17 @@
                 </div>
               {% endwith %}
             </div>
-            <input type="hidden" name="equipamentos_data" id="equipamentos_data_hidden">
+            <input type="hidden" name="equipamentos_data" id="equipamentos_data_hidden" class="progress-input">
           </div>
 
           <div class="mb-2">
             <label class="form-label">Fornecedores</label>
-            <textarea name="fornecedores" class="form-control form-control-sm" rows="2">{{ evento.fornecedores }}</textarea>
+            <textarea name="fornecedores" class="form-control form-control-sm progress-input" rows="2">{{ evento.fornecedores }}</textarea>
           </div>
 
           <div class="mb-2">
             <label class="form-label">Patrocinadores</label>
-            <textarea name="patrocinadores" class="form-control form-control-sm" rows="2">{{ evento.patrocinadores }}</textarea>
+            <textarea name="patrocinadores" class="form-control form-control-sm progress-input" rows="2">{{ evento.patrocinadores }}</textarea>
           </div>
         </div>
 
@@ -412,17 +384,17 @@
 
           <div class="mb-2">
             <label class="form-label">Contratações</label>
-            <textarea name="contratacoes" class="form-control form-control-sm" rows="2">{{ evento.contratacoes }}</textarea>
+            <textarea name="contratacoes" class="form-control form-control-sm progress-input" rows="2">{{ evento.contratacoes }}</textarea>
           </div>
 
           <div class="mb-2">
             <label class="form-label">Estruturas</label>
-            <textarea name="estruturas" class="form-control form-control-sm" rows="2">{{ evento.estruturas }}</textarea>
+            <textarea name="estruturas" class="form-control form-control-sm progress-input" rows="2">{{ evento.estruturas }}</textarea>
           </div>
 
           <div class="mb-2">
             <label class="form-label">Marketing</label>
-            <input name="marketing" type="text" class="form-control form-control-sm" value="{{ evento.marketing }}">
+            <input name="marketing" type="text" class="form-control form-control-sm progress-input" value="{{ evento.marketing }}">
           </div>
         </div>
       </div>
@@ -434,10 +406,10 @@
     </div>
   </form>
 
-  {# !! IMPORTANTE !! Substitua YOUR_API_KEY pela sua chave real do Google Maps #}
   <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initAutocomplete" async defer></script>
 
   <script>
+    // Script do Autocomplete do Google
     function initAutocomplete() {
       const input = document.getElementById('autocomplete');
       if (!input) return;
@@ -454,96 +426,126 @@
       });
     }
 
+    // Script principal da página, agora com a lógica da barra de progresso
     document.addEventListener('DOMContentLoaded', function() {
+      // Lógica do orçamento
+      const orcamentoMascara = document.getElementById('orcamento_mascara');
+      const orcamentoReal = document.getElementById('orcamento_real');
+      if (orcamentoMascara && orcamentoReal) {
+          if (orcamentoReal.value && !isNaN(parseFloat(orcamentoReal.value))) {
+             let valorNumerico = parseFloat(orcamentoReal.value);
+             let valorInicial = valorNumerico.toFixed(2).replace('.', '');
+             if (valorInicial.length < 3) valorInicial = valorInicial.padStart(3, '0');
+             let integer = valorInicial.slice(0, -2) || "0";
+             if (integer === "" && valorNumerico < 1 && valorNumerico > 0) integer = "0";
+             let decimal = valorInicial.slice(-2);
+             let formatted = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + decimal;
+             orcamentoMascara.value = 'R$ ' + formatted;
+          } else if (orcamentoReal.value === '0' || orcamentoReal.value === '0.0' || orcamentoReal.value === '0.00') {
+              orcamentoMascara.value = 'R$ 0,00';
+          }
+
+          orcamentoMascara.addEventListener('input', function(e) {
+              let value = e.target.value.replace(/\D/g, '');
+              value = value.replace(/^0+/, '');
+              if (value.length === 0) {
+                  orcamentoReal.value = ''; e.target.value = ''; return;
+              }
+              if (value.length < 3) value = value.padStart(3, '0');
+              let integer = value.slice(0, -2) || "0";
+              let decimal = value.slice(-2);
+              let formatted = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + decimal;
+              e.target.value = 'R$ ' + formatted;
+              orcamentoReal.value = (parseInt(value) / 100).toFixed(2);
+          });
+      }
+
+      // --- LÓGICA DA BARRA DE PROGRESSO ADICIONADA ---
+      const progressBar = document.getElementById('progress-bar');
+      const progressLabel = document.getElementById('progress-label');
+      const formInputs = document.querySelectorAll('.progress-input');
+      const totalFields = formInputs.length;
+
+      function updateProgress() {
+          if (!progressBar || !progressLabel) return;
+          let filledFields = 0;
+          formInputs.forEach(input => {
+              if (input.type === 'file') {
+                  if (input.files.length > 0 || document.getElementById('current-event-image')) {
+                      filledFields++;
+                  }
+              } else if (input.id === 'equipamentos_data_hidden') {
+                  if (input.value && input.value !== '[]') filledFields++;
+              } else {
+                  if (input.value && input.value.trim() !== '') {
+                      filledFields++;
+                  }
+              }
+          });
+          const percentage = totalFields > 0 ? (filledFields / totalFields) * 100 : 0;
+          progressBar.style.width = percentage + '%';
+          progressLabel.textContent = Math.round(percentage) + '% completo';
+      }
+
+      formInputs.forEach(input => {
+          const eventType = (input.tagName.toLowerCase() === 'select' || input.type === 'date' || input.type === 'file') ? 'change' : 'input';
+          input.addEventListener(eventType, updateProgress);
+      });
+      // --- FIM DA LÓGICA DA BARRA DE PROGRESSO ---
+
+      // Lógica original dos equipamentos
       const containerCheckboxes = document.getElementById('equipamentos_checkbox_container');
       const displayEquipamentos = document.getElementById('equipamentos_selecionados_display');
       const hiddenInputEquipamentosData = document.getElementById('equipamentos_data_hidden');
 
       if (!containerCheckboxes || !displayEquipamentos || !hiddenInputEquipamentosData) {
-        return;
+          updateProgress();
+          return;
       }
 
-      let equipamentosSelecionadosComQuantidade = [];
-
-      function atualizarTudo() {
-        equipamentosSelecionadosComQuantidade = [];
-        const todosCheckboxes = containerCheckboxes.querySelectorAll('.equipamento-checkbox');
-
-        todosCheckboxes.forEach(checkbox => {
-          if (checkbox.checked) {
-            const nomeEquipamento = checkbox.value;
-            const quantityInput = containerCheckboxes.querySelector(`.equipamento-quantity-input[data-equipamento="${CSS.escape(nomeEquipamento)}"]`);
-            let quantidade = 1;
-            if (quantityInput) {
-              quantidade = parseInt(quantityInput.value) || 1;
-            }
-            equipamentosSelecionadosComQuantidade.push({ nome: nomeEquipamento, quantidade: quantidade });
-          }
-        });
-
-        if (equipamentosSelecionadosComQuantidade.length > 0) {
-          displayEquipamentos.textContent = equipamentosSelecionadosComQuantidade
-            .map(item => `${item.quantidade} x ${item.nome}`)
-            .join(', ');
-        } else {
-          displayEquipamentos.textContent = 'Nenhum equipamento selecionado.';
-        }
-        hiddenInputEquipamentosData.value = JSON.stringify(equipamentosSelecionadosComQuantidade);
+      function atualizarTudoEquipamentos() {
+          let equipamentosSelecionadosComQuantidade = [];
+          const todosCheckboxes = containerCheckboxes.querySelectorAll('.equipamento-checkbox');
+          todosCheckboxes.forEach(checkbox => {
+              if (checkbox.checked) {
+                  const nomeEquipamento = checkbox.value;
+                  const quantityInput = checkbox.closest('.equipamento-item-wrapper').querySelector('.equipamento-quantity-input');
+                  let quantidade = (quantityInput) ? parseInt(quantityInput.value) || 1 : 1;
+                  equipamentosSelecionadosComQuantidade.push({ nome: nomeEquipamento, quantidade: quantidade });
+              }
+          });
+          displayEquipamentos.textContent = equipamentosSelecionadosComQuantidade.length > 0
+              ? equipamentosSelecionadosComQuantidade.map(item => `${item.quantidade} x ${item.nome}`).join(', ')
+              : 'Nenhum equipamento selecionado.';
+          hiddenInputEquipamentosData.value = JSON.stringify(equipamentosSelecionadosComQuantidade);
+          updateProgress();
       }
-
+      
       containerCheckboxes.querySelectorAll('.equipamento-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', function(event) {
-          const nomeEquipamento = event.target.value;
-          const quantityInput = event.target.closest('.equipamento-item-wrapper').querySelector(`.equipamento-quantity-input[data-equipamento="${CSS.escape(nomeEquipamento)}"]`);
-          if (!quantityInput) {
-            atualizarTudo();
-            return;
+          const quantityInput = checkbox.closest('.equipamento-item-wrapper').querySelector('.equipamento-quantity-input');
+          if (checkbox.checked) {
+              quantityInput.style.display = 'inline-block';
           }
-          if (event.target.checked) {
-            quantityInput.style.display = 'inline-block';
-            if (!quantityInput.value || parseInt(quantityInput.value) < 1) {
-              quantityInput.value = '1';
-            }
-          } else {
-            quantityInput.style.display = 'none';
-          }
-          atualizarTudo();
-        });
-
-        if (checkbox.checked) {
-          const nomeEquipamento = checkbox.value;
-          const quantityInput = checkbox.closest('.equipamento-item-wrapper').querySelector(`.equipamento-quantity-input[data-equipamento="${CSS.escape(nomeEquipamento)}"]`);
-          if (quantityInput) {
-            quantityInput.style.display = 'inline-block';
-            if (!quantityInput.value || parseInt(quantityInput.value) < 1) {
-              quantityInput.value = '1';
-            }
-          }
-        } else {
-          const nomeEquipamento = checkbox.value;
-          const quantityInput = checkbox.closest('.equipamento-item-wrapper').querySelector(`.equipamento-quantity-input[data-equipamento="${CSS.escape(nomeEquipamento)}"]`);
-          if (quantityInput) {
-            quantityInput.style.display = 'none';
-          }
-        }
+          checkbox.addEventListener('change', function(event) {
+              const currentQuantityInput = event.target.closest('.equipamento-item-wrapper').querySelector('.equipamento-quantity-input');
+              currentQuantityInput.style.display = event.target.checked ? 'inline-block' : 'none';
+              if(event.target.checked) currentQuantityInput.value = '1';
+              atualizarTudoEquipamentos();
+          });
       });
 
       containerCheckboxes.querySelectorAll('.equipamento-quantity-input').forEach(quantityInput => {
-        quantityInput.addEventListener('input', function(event) {
-          if (parseInt(event.target.value) < 1 && event.target.value !== "") {
-            event.target.value = '1';
-          }
-          atualizarTudo();
-        });
-        quantityInput.addEventListener('blur', function(event) {
-          if (!event.target.value || parseInt(event.target.value) < 1) {
-            event.target.value = '1';
-            atualizarTudo();
-          }
-        });
+          quantityInput.addEventListener('input', atualizarTudoEquipamentos);
+          quantityInput.addEventListener('blur', function(event) {
+              if (!event.target.value || parseInt(event.target.value) < 1) {
+                  event.target.value = '1';
+                  atualizarTudoEquipamentos();
+              }
+          });
       });
 
-      atualizarTudo();
+      // Chamada inicial para configurar o estado da página
+      atualizarTudoEquipamentos();
     });
   </script>
 </div>

@@ -3,7 +3,48 @@
 
 {% block conteudo %}
 <style>
-  /* Estilos para a área dos checkboxes de equipamentos */
+  /* --- ESTILOS ADICIONADOS --- */
+  .content {
+    /* Adiciona espaço no final para o conteúdo não ficar sob a barra fixa */
+    padding-bottom: 100px; 
+  }
+
+  .progress-container {
+    margin-bottom: 1.5rem;
+  }
+  .progress-bar-wrapper {
+    background-color: #e9ecef;
+    border-radius: .25rem;
+    height: 8px;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    background-color: #0d6efd;
+    height: 100%;
+    width: 0%; /* Inicia em 0 */
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    text-align: right;
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 2px;
+  }
+
+  .form-actions-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    padding: 1rem 2rem;
+    border-top: 1px solid #e0e0e0;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.07);
+    text-align: right;
+    z-index: 1030;
+  }
+  
+  /* --- ESTILOS ORIGINAIS --- */
   .equipamentos-checkbox-container {
     max-height: 250px; 
     overflow-y: auto;
@@ -11,24 +52,20 @@
     padding: 10px;
     border-radius: 3px;
   }
-
   .equipamento-item-wrapper { 
     display: flex;
     align-items: center;
     margin-bottom: 8px;
   }
-
   .equipamento-item-label { 
     display: flex;
     align-items: center;
     cursor: pointer;
     flex-grow: 1; 
   }
-
   .equipamento-item-label input[type="checkbox"] {
     margin-right: 8px;
   }
-
   .equipamento-quantity-input {
     width: 60px;
     padding: 2px 5px;
@@ -37,7 +74,6 @@
     border-radius: 3px;
     margin-left: 10px;
   }
-
   #equipamentos_selecionados_display {
     margin-bottom: 10px;
     padding: 8px;
@@ -53,6 +89,13 @@
 <div class="content">
   <h2 class="mb-4">Cadastro de Evento</h2>
 
+  <div class="progress-container">
+    <div class="progress-bar-wrapper">
+        <div id="progress-bar" class="progress-bar-inner"></div>
+    </div>
+    <div id="progress-label" class="progress-label">0% completo</div>
+  </div>
+
   {# !! IMPORTANTE !! Ajuste 'nome_da_url_para_salvar_evento' para o nome da URL da sua view 'eventos' (a que CRIA o evento) no seu urls.py #}
   <form action="{% url 'nome_da_url_para_salvar_evento' %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
@@ -62,11 +105,11 @@
           <h5>Informações Básicas</h5>
           <div class="mb-2">
             <label class="form-label">Título</label>
-            <input name="titulo" type="text" class="form-control form-control-sm" placeholder="Digite o nome do evento" required>
+            <input name="titulo" type="text" class="form-control form-control-sm progress-input" placeholder="Digite o nome do evento" required>
           </div>
           <div class="mb-2">
             <label class="form-label">Responsável</label>
-            <select name="responsavel" class="form-select form-select-sm" required>
+            <select name="responsavel" class="form-select form-select-sm progress-input" required>
               <option value="">Selecione</option>
               <option value="Secretaria de Turismo">SECRETARIA DE TURISMO</option>
               <option value="Secretaria de Cultura">SECRETARIA DE CULTURA</option>
@@ -74,55 +117,35 @@
           </div>
           <div class="mb-2">
             <label class="form-label">Local</label>
-            <input id="autocomplete" name="local" type="text" class="form-control form-control-sm" placeholder="Digite o endereço" required>
+            <input id="autocomplete" name="local" type="text" class="form-control form-control-sm progress-input" placeholder="Digite o endereço" required>
             <input type="hidden" id="latitude" name="latitude">
             <input type="hidden" id="longitude" name="longitude">
           </div>
           <div class="mb-2">
             <label class="form-label">Descrição</label>
-            <textarea name="descricao" class="form-control form-control-sm" placeholder="Descreva o conteúdo do seu evento" rows="2"></textarea>
+            <textarea name="descricao" class="form-control form-control-sm progress-input" placeholder="Descreva o conteúdo do seu evento" rows="2"></textarea>
           </div>
           <div class="mb-2">
             <label class="form-label">Data</label>
-            <input name="data" type="date" class="form-control form-control-sm" required>
+            <input name="data" type="date" class="form-control form-control-sm progress-input" required>
           </div>
           <div class="mb-2">
             <label class="form-label">Atrações</label>
-            <input name="atracoes" type="text" class="form-control form-control-sm" placeholder="Atrações do evento">
+            <input name="atracoes" type="text" class="form-control form-control-sm progress-input" placeholder="Atrações do evento">
           </div>
           <div class="mb-2">
             <label class="form-label">Orçamento Estimado</label>
-            <input id="orcamento_mascara" type="text" class="form-control form-control-sm" placeholder="R$ 0,00">
+            <input id="orcamento_mascara" type="text" class="form-control form-control-sm progress-input" placeholder="R$ 0,00">
             <input id="orcamento_real" name="orcamento_estimado" type="hidden">
           </div>
-          <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const orcamentoMascara = document.getElementById('orcamento_mascara');
-                const orcamentoReal = document.getElementById('orcamento_real');
-                if(orcamentoMascara && orcamentoReal) { 
-                    orcamentoMascara.addEventListener('input', function(e) {
-                        let value = e.target.value.replace(/\D/g, '');
-                        value = value.replace(/^0+/, '');
-                        if (value.length === 0) { 
-                            orcamentoReal.value = ''; e.target.value = ''; return;
-                        }
-                        if (value.length < 3) value = value.padStart(3, '0');
-                        let integer = value.slice(0, -2) || "0";
-                        let decimal = value.slice(-2);
-                        let formatted = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + decimal;
-                        e.target.value = 'R$ ' + formatted;
-                        orcamentoReal.value = (parseInt(value) / 100).toFixed(2);
-                    });
-                }
-            });
-          </script>
+          
           <div class="mb-2">
             <label class="form-label">Programação</label>
-            <textarea name="programacao" class="form-control form-control-sm" rows="2" placeholder="Liste a programação"></textarea>
+            <textarea name="programacao" class="form-control form-control-sm progress-input" rows="2" placeholder="Liste a programação"></textarea>
           </div>
           <div class="mb-3">
             <label class="form-label">Imagem do Evento</label>
-            <input name="imagem" type="file" class="form-control">
+            <input name="imagem" type="file" class="form-control progress-input">
           </div>
         </div>
       </div>
@@ -344,16 +367,16 @@
                 <input type="number" class="equipamento-quantity-input" style="display:none;" min="1" value="1" data-equipamento="WC PNE">
               </div>
             </div>
-            <input type="hidden" name="equipamentos_data" id="equipamentos_data_hidden">
+            <input type="hidden" name="equipamentos_data" id="equipamentos_data_hidden" class="progress-input">
           </div>
 
           <div class="mb-2">
             <label class="form-label">Fornecedores</label>
-            <textarea name="fornecedores" class="form-control form-control-sm" placeholder="Digite os fornecedores" rows="2" required></textarea>
+            <textarea name="fornecedores" class="form-control form-control-sm progress-input" placeholder="Digite os fornecedores" rows="2" required></textarea>
           </div>
           <div class="mb-2">
             <label class="form-label">Patrocinadores</label>
-            <textarea name="patrocinadores" class="form-control form-control-sm" placeholder="Digite os patrocinadores" rows="2" required></textarea>
+            <textarea name="patrocinadores" class="form-control form-control-sm progress-input" placeholder="Digite os patrocinadores" rows="2" required></textarea>
           </div>
         </div>
 
@@ -361,26 +384,50 @@
           <h5>Outros</h5>
           <div class="mb-2">
             <label class="form-label">Contratações</label>
-            <textarea name="contratacoes" class="form-control form-control-sm" rows="2"></textarea>
+            <textarea name="contratacoes" class="form-control form-control-sm progress-input" rows="2"></textarea>
           </div>
           <div class="mb-2">
             <label class="form-label">Estruturas</label>
-            <textarea name="estruturas" class="form-control form-control-sm" rows="2"></textarea>
+            <textarea name="estruturas" class="form-control form-control-sm progress-input" rows="2"></textarea>
           </div>
           <div class="mb-2">
             <label class="form-label">Marketing</label>
-            <input name="marketing" type="text" class="form-control form-control-sm">
+            <input name="marketing" type="text" class="form-control form-control-sm progress-input">
           </div>
         </div>
       </div>
     </div>
-    <button type="submit" class="btn btn-primary btn-save">Salvar</button>
+    
+    <div class="form-actions-fixed">
+        <button type="submit" class="btn btn-primary btn-save">Salvar</button>
+    </div>
   </form>
   
-  {# !! IMPORTANTE !! Substitua YOUR_API_KEY pela sua chave real do Google Maps #}
   <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initAutocomplete" async defer></script>
 
   <script>
+    // Bloco de script original para máscara de orçamento, separado para clareza
+    document.addEventListener('DOMContentLoaded', function() {
+        const orcamentoMascara = document.getElementById('orcamento_mascara');
+        const orcamentoReal = document.getElementById('orcamento_real');
+        if(orcamentoMascara && orcamentoReal) { 
+            orcamentoMascara.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                value = value.replace(/^0+/, '');
+                if (value.length === 0) { 
+                    orcamentoReal.value = ''; e.target.value = ''; return;
+                }
+                if (value.length < 3) value = value.padStart(3, '0');
+                let integer = value.slice(0, -2) || "0";
+                let decimal = value.slice(-2);
+                let formatted = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + decimal;
+                e.target.value = 'R$ ' + formatted;
+                orcamentoReal.value = (parseInt(value) / 100).toFixed(2);
+            });
+        }
+    });
+
+    // Função original do Google Maps Autocomplete
     function initAutocomplete() {
       const input = document.getElementById('autocomplete');
       if (!input) return; 
@@ -396,13 +443,50 @@
       });
     }
 
+    // Bloco de script principal para equipamentos e a nova barra de progresso
     document.addEventListener('DOMContentLoaded', function() {
         const containerCheckboxes = document.getElementById('equipamentos_checkbox_container');
         const displayEquipamentos = document.getElementById('equipamentos_selecionados_display');
         const hiddenInputEquipamentosData = document.getElementById('equipamentos_data_hidden');
 
+        // --- LÓGICA ADICIONADA PARA BARRA DE PROGRESSO ---
+        const progressBar = document.getElementById('progress-bar');
+        const progressLabel = document.getElementById('progress-label');
+        const formInputs = document.querySelectorAll('.progress-input');
+        const totalFields = formInputs.length;
+
+        function updateProgress() {
+            if (!progressBar || !progressLabel || !formInputs) return;
+
+            let filledFields = 0;
+            formInputs.forEach(input => {
+                if (input.type === 'file') {
+                    if (input.files.length > 0) filledFields++;
+                } else if (input.id === 'equipamentos_data_hidden') {
+                    if (input.value && input.value !== '[]') filledFields++;
+                } else {
+                    if (input.value && input.value.trim() !== '') {
+                        filledFields++;
+                    }
+                }
+            });
+
+            const percentage = totalFields > 0 ? (filledFields / totalFields) * 100 : 0;
+            
+            progressBar.style.width = percentage + '%';
+            progressLabel.textContent = Math.round(percentage) + '% completo';
+        }
+
+        // Adiciona um listener para cada input para atualizar a barra em tempo real
+        formInputs.forEach(input => {
+            const eventType = (input.tagName.toLowerCase() === 'select' || input.type === 'date' || input.type === 'file') ? 'change' : 'input';
+            input.addEventListener(eventType, updateProgress);
+        });
+        // --- FIM DA LÓGICA DA BARRA DE PROGRESSO ---
+
+        // Lógica original dos Equipamentos
         if (!containerCheckboxes || !displayEquipamentos || !hiddenInputEquipamentosData) {
-            // console.warn("Elementos do formulário de equipamentos não encontrados."); // Comentado para não poluir console se intencional
+            updateProgress(); // Chama a barra de progresso mesmo se não houver equipamentos
             return;
         }
 
@@ -414,13 +498,9 @@
             
             todosCheckboxes.forEach(checkbox => {
                 if (checkbox.checked) {
-                    const nomeEquipamento = checkbox.value; // Já deve estar em MAIÚSCULAS pelo HTML
+                    const nomeEquipamento = checkbox.value;
                     const quantityInput = containerCheckboxes.querySelector(`.equipamento-quantity-input[data-equipamento="${CSS.escape(nomeEquipamento)}"]`);
-                    
-                    let quantidade = 1; 
-                    if (quantityInput) {
-                        quantidade = parseInt(quantityInput.value) || 1; 
-                    }
+                    let quantidade = (quantityInput) ? parseInt(quantityInput.value) || 1 : 1;
                     equipamentosSelecionadosComQuantidade.push({ nome: nomeEquipamento, quantidade: quantidade });
                 }
             });
@@ -433,19 +513,20 @@
                 displayEquipamentos.textContent = 'Nenhum equipamento selecionado.';
             }
             hiddenInputEquipamentosData.value = JSON.stringify(equipamentosSelecionadosComQuantidade);
+            
+            
+            updateProgress(); 
         }
 
         containerCheckboxes.querySelectorAll('.equipamento-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', function(event) {
-                const nomeEquipamento = event.target.value; // Já em MAIÚSCULAS
+                const nomeEquipamento = event.target.value;
                 const quantityInput = event.target.closest('.equipamento-item-wrapper').querySelector(`.equipamento-quantity-input[data-equipamento="${CSS.escape(nomeEquipamento)}"]`);
-                
                 if (!quantityInput) {
                     console.error(`Input de quantidade não encontrado para ${nomeEquipamento}.`);
                     atualizarTudo(); 
                     return; 
                 }
-
                 if (event.target.checked) {
                     quantityInput.style.display = 'inline-block';
                     quantityInput.value = '1'; 
@@ -474,6 +555,8 @@
         containerCheckboxes.querySelectorAll('.equipamento-quantity-input').forEach(qInput => {
             qInput.style.display = 'none'; 
         });
+
+        // Chamada inicial para ambos os scripts
         atualizarTudo(); 
     });
   </script>
