@@ -4,7 +4,6 @@
 <div class="content">
   <div id="calendar" style="padding: 1rem;"></div>
 
-  <!-- FullCalendar + SweetAlert2 CSS/JS -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -68,7 +67,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       const calendarEl = document.getElementById('calendar');
       
-      // Create custom header elements
+     
       const customHeader = document.createElement('div');
       customHeader.className = 'custom-header';
       
@@ -83,20 +82,17 @@
       nextButton.className = 'nav-button';
       nextButton.innerHTML = '&rarr;';
       
-      // Insert custom header
       customHeader.appendChild(prevButton);
       customHeader.appendChild(periodTitle);
       customHeader.appendChild(nextButton);
       calendarEl.parentNode.insertBefore(customHeader, calendarEl);
-      
-      // Initialize calendar
+   
       const calendar = new FullCalendar.Calendar(calendarEl, {
         locale: 'pt-br',
         initialView: 'dayGridMonth',
-        headerToolbar: false, // Hide default toolbar
-        firstDay: 0, // Start week on Sunday
-        
-        // View switching buttons
+        headerToolbar: false, 
+        firstDay: 0, 
+
         headerToolbar: {
           left: '',
           center: '',
@@ -104,8 +100,7 @@
         },
         
         events: '{% url "events_json" %}',
-        
-        // Update title when view changes
+ 
         datesSet: function(info) {
           const viewType = info.view.type;
           let title = '';
@@ -140,7 +135,6 @@
           };
         },
         
-        // Event click handler
         eventClick: function(info) {
           info.jsEvent.preventDefault();
           
@@ -172,8 +166,7 @@
       });
       
       calendar.render();
-      
-      // Navigation button handlers
+
       prevButton.addEventListener('click', function() {
         calendar.prev();
       });
@@ -182,7 +175,6 @@
         calendar.next();
       });
       
-      // Optional: Add view switcher buttons if needed
       const viewSwitcher = document.createElement('div');
       viewSwitcher.style.textAlign = 'center';
       viewSwitcher.style.marginBottom = '15px';

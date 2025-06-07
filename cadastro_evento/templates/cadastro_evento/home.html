@@ -1,13 +1,13 @@
 {% extends "cadastro_evento/base.html" %}
 {% load static %}
-{% load l10n %} {# Necessário para o filtro 'unlocalize' no orçamento #}
+{% load l10n %} 
 
 {% block conteudo %}
 
 <div class="content">
-  <div class="filtro_and_search mb-4 d-flex justify-content-between align-items-center flex-wrap"> {# Adicionado flex-wrap para responsividade #}
-    <div class="filtro mb-3 mb-md-0"> {# Adicionado margin-bottom para telas menores #}
-      <h5 style="font-size: 1.5rem;">Filtrar por secretaria</h5> {# Ajustado tamanho da fonte #}
+  <div class="filtro_and_search mb-4 d-flex justify-content-between align-items-center flex-wrap"> 
+    <div class="filtro mb-3 mb-md-0"> 
+      <h5 style="font-size: 1.5rem;">Filtrar por secretaria</h5> 
       <div class="form-check">
         <input class="form-check-input" type="checkbox" id="culturaCheckbox" onchange="filtrarEventos()">
         <label class="form-check-label" for="culturaCheckbox">Secretaria de Cultura</label>
@@ -19,9 +19,9 @@
     </div>
 
     <div class="search-oficial">
-      <form method="get" action="{% url 'home' %}" class="d-flex align-items-end gap-2 flex-wrap"> {# Adicionado flex-wrap #}
+      <form method="get" action="{% url 'home' %}" class="d-flex align-items-end gap-2 flex-wrap"> 
         <div class="flex-grow-1">
-          <label for="q_search" class="form-label mb-1 small visually-hidden">Pesquisar evento</label> {# Label para acessibilidade #}
+          <label for="q_search" class="form-label mb-1 small visually-hidden">Pesquisar evento</label> 
           <input type="text" name="q" id="q_search" value="{{ query|default:'' }}" placeholder="Pesquisar evento..." class="form-control">
         </div>
         <div class="d-flex flex-column">
@@ -32,8 +32,8 @@
           <label for="data_final" class="form-label mb-1 small">Data final</label>
           <input type="date" name="data_final" id="data_final" value="{{ data_final|default:'' }}" class="form-control">
         </div>
-        <button type="submit" class="btn btn-primary px-3 align-self-end">Buscar</button> {# Alinhado com outros inputs #}
-        <a href="{% url 'home' %}" class="btn btn-secondary px-3 align-self-end">Limpar</a> {# Alinhado #}
+        <button type="submit" class="btn btn-primary px-3 align-self-end">Buscar</button> 
+        <a href="{% url 'home' %}" class="btn btn-secondary px-3 align-self-end">Limpar</a> 
       </form>
     </div>
   </div>
@@ -45,7 +45,6 @@
     
     <div style="position: absolute; top: 16px; right: 16px;" class="d-flex gap-2">
       <a href="{% url 'editar_evento' evento.id %}" class="btn btn-sm btn-warning p-1 px-2" title="Editar">Editar</a>
-      {# O formulário de exclusão agora é submetido pelo JavaScript do SweetAlert #}
       <form action="{% url 'excluir_evento' evento.id %}" method="post" style="margin: 0;" class="form-excluir-evento d-inline">
         {% csrf_token %}
         <button type="button"
@@ -64,7 +63,7 @@
              style="width: 180px; height: 120px; object-fit: cover; border-radius: 10px; margin-right: 1.5rem;">
       {% endif %}
 
-      <div class="ms-0"> {# Removido ms-4 pois a imagem agora tem margin-right #}
+      <div class="ms-0"> 
         <h5>{{ evento.titulo }}</h5>
         <p class="text-muted mb-1">{{ evento.data|date:"d \d\e F \d\e Y" }}</p>
         <p class="mb-2" style="text-align: justify;">{{ evento.descricao|truncatechars:120 }}</p>
@@ -104,7 +103,7 @@
 
 <div class="modal fade" id="eventoModal" tabindex="-1" aria-labelledby="eventoModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content p-3 p-md-4" style="max-height: 90vh;"> {# Ajustado padding e max-height #}
+    <div class="modal-content p-3 p-md-4" style="max-height: 90vh;"> 
       <div class="modal-header">
         <h5 class="modal-title" id="eventoModalLabel">Detalhes do Evento</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
@@ -120,13 +119,13 @@
 {% if messages %}
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function() { // Garante que o DOM está pronto
+    document.addEventListener('DOMContentLoaded', function() { 
       {% for message in messages %}
         Swal.fire({
           title: '{% if message.tags == "success" %}Sucesso!{% elif message.tags == "error" %}Erro!{% elif message.tags == "warning" %}Atenção!{% else %}Info!{% endif %}',
           text: '{{ message|escapejs }}',
-          icon: '{{ message.tags }}', // success, error, warning, info, question
-          timer: 3000, // Aumentei um pouco o timer
+          icon: '{{ message.tags }}', 
+          timer: 3000, 
           showConfirmButton: false
         });
       {% endfor %}
@@ -138,7 +137,7 @@
 function formatarMoeda(valor) {
     const numero = parseFloat(valor);
     if (isNaN(numero)) {
-        return "Não informado"; // Ou "-"
+        return "Não informado"; 
     }
     return numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
@@ -153,14 +152,13 @@ function mostrarDetalhes(titulo, descricao, data, responsavel, imagemUrl,
         try {
             const equipamentosLista = JSON.parse(equipamentoJsonStr);
             if (Array.isArray(equipamentosLista) && equipamentosLista.length > 0) {
-                equipamentosHtml = '<ul class="list-unstyled">'; // Usando list-unstyled para melhor visual
+                equipamentosHtml = '<ul class="list-unstyled">'; 
                 equipamentosLista.forEach(item => {
-                    equipamentosHtml += `<li>${item.quantidade || 1} x ${item.nome || item.value || 'Equipamento desconhecido'}</li>`; // Tenta 'nome' ou 'value'
+                    equipamentosHtml += `<li>${item.quantidade || 1} x ${item.nome || item.value || 'Equipamento desconhecido'}</li>`;
                 });
                 equipamentosHtml += '</ul>';
             }
         } catch (e) {
-            // Se não for JSON válido, mas uma string simples (dados antigos), mostra como está
             if (typeof equipamentoJsonStr === 'string') {
                  equipamentosHtml = `<p>${equipamentoJsonStr}</p>`;
             }
@@ -170,14 +168,13 @@ function mostrarDetalhes(titulo, descricao, data, responsavel, imagemUrl,
     let programacaoHtml = '<p>Não informado</p>';
     if (programacaoStr && programacaoStr.trim() !== "" && programacaoStr.trim() !== "[]" && programacaoStr.trim() !== "-") {
         try {
-            // Tenta parsear se for uma string JSON de uma lista/objeto
             const programacaoObj = JSON.parse(programacaoStr);
             if (Array.isArray(programacaoObj) && programacaoObj.length > 0) {
                 programacaoHtml = '<ul class="list-unstyled">';
                 programacaoObj.forEach(item => {
-                    // Adapte aqui se a estrutura do item da programação for mais complexa
+                    
                     if (typeof item === 'object' && item !== null) { 
-                         programacaoHtml += `<li>${JSON.stringify(item)}</li>`; // Exemplo simples para objeto
+                         programacaoHtml += `<li>${JSON.stringify(item)}</li>`; 
                     } else {
                          programacaoHtml += `<li>${item}</li>`;
                     }
@@ -185,10 +182,10 @@ function mostrarDetalhes(titulo, descricao, data, responsavel, imagemUrl,
                 programacaoHtml += '</ul>';
             } else if (typeof programacaoObj === 'object' && programacaoObj !== null && Object.keys(programacaoObj).length > 0) { 
                  programacaoHtml = '<pre>' + JSON.stringify(programacaoObj, null, 2) + '</pre>';
-            } else if (typeof programacaoObj === 'string') { // Se parseou para uma string simples
+            } else if (typeof programacaoObj === 'string') { 
                  programacaoHtml = `<p>${programacaoObj}</p>`;
             }
-        } catch (e) { // Se não for JSON, mostra como string que foi passada
+        } catch (e) { 
             programacaoHtml = `<p>${programacaoStr}</p>`;
         }
     }
@@ -232,18 +229,17 @@ function mostrarDetalhes(titulo, descricao, data, responsavel, imagemUrl,
         ${equipamentosHtml}
       </div>
     `;
-    document.getElementById('eventoModalLabel').innerText = titulo; // Atualiza o título do modal
+    document.getElementById('eventoModalLabel').innerText = titulo; 
     document.getElementById('modal-body-content').innerHTML = conteudo;
 }
 </script>
 
 <script>
-// Script para SweetAlert2 de exclusão
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.btn-excluir-evento-swal').forEach(btn => {
         btn.addEventListener('click', function (event) {
-            event.preventDefault(); // Previne qualquer ação padrão do botão se ele não for type="button"
-            const form = this.closest('form'); // Pega o formulário pai do botão
+            event.preventDefault();
+            const form = this.closest('form'); 
 
             Swal.fire({
                 title: 'Tem certeza?',
@@ -256,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 cancelButtonColor: '#3085d6',
             }).then(result => {
                 if (result.isConfirmed) {
-                    form.submit(); // Submete o formulário original
+                    form.submit(); 
                 }
             });
         });

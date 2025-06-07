@@ -1,9 +1,8 @@
 {% extends "cadastro_evento/base.html" %}
-{% load static %} {# Certifique-se que static está carregado #}
+{% load static %} 
 
 {% block conteudo %}
 <style>
-  /* --- ESTILOS ADICIONADOS PARA BARRA DE PROGRESSO --- */
   .progress-container {
     margin-bottom: 1.5rem;
   }
@@ -16,7 +15,7 @@
   .progress-bar-inner {
     background-color: #0d6efd;
     height: 100%;
-    width: 0%; /* Inicia em 0, mas o script atualiza no load */
+    width: 0%; 
     transition: width 0.4s ease;
   }
   .progress-label {
@@ -26,7 +25,7 @@
     margin-top: 2px;
   }
 
-  /* --- ESTILOS ORIGINAIS DO SEU CÓDIGO --- */
+  
   .navbar-nav {
     display: none !important;
   }

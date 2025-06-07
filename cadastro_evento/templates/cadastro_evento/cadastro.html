@@ -1,5 +1,5 @@
 {% extends "cadastro_evento/base.html" %}
-{% load static %} {# Certifique-se que static está carregado #}
+{% load static %} 
 
 {% block conteudo %}
 <style>
@@ -96,8 +96,7 @@
     <div id="progress-label" class="progress-label">0% completo</div>
   </div>
 
-  {# !! IMPORTANTE !! Ajuste 'nome_da_url_para_salvar_evento' para o nome da URL da sua view 'eventos' (a que CRIA o evento) no seu urls.py #}
-  <form action="{% url 'nome_da_url_para_salvar_evento' %}" method="post" enctype="multipart/form-data">
+  <form action="{% url 'listagem_evento' %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="row">
       <div class="col-md-6">
@@ -406,7 +405,6 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdV3seSOOBkqraltqD7TTh4U3FGC3pEC0&libraries=places&callback=initAutocomplete" async defer></script>
 
   <script>
-    // Bloco de script original para máscara de orçamento, separado para clareza
     document.addEventListener('DOMContentLoaded', function() {
         const orcamentoMascara = document.getElementById('orcamento_mascara');
         const orcamentoReal = document.getElementById('orcamento_real');
@@ -427,7 +425,6 @@
         }
     });
 
-    // Função original do Google Maps Autocomplete
     function initAutocomplete() {
       const input = document.getElementById('autocomplete');
       if (!input) return; 
@@ -443,13 +440,11 @@
       });
     }
 
-    // Bloco de script principal para equipamentos e a nova barra de progresso
     document.addEventListener('DOMContentLoaded', function() {
         const containerCheckboxes = document.getElementById('equipamentos_checkbox_container');
         const displayEquipamentos = document.getElementById('equipamentos_selecionados_display');
         const hiddenInputEquipamentosData = document.getElementById('equipamentos_data_hidden');
 
-        // --- LÓGICA ADICIONADA PARA BARRA DE PROGRESSO ---
         const progressBar = document.getElementById('progress-bar');
         const progressLabel = document.getElementById('progress-label');
         const formInputs = document.querySelectorAll('.progress-input');
@@ -477,16 +472,14 @@
             progressLabel.textContent = Math.round(percentage) + '% completo';
         }
 
-        // Adiciona um listener para cada input para atualizar a barra em tempo real
         formInputs.forEach(input => {
             const eventType = (input.tagName.toLowerCase() === 'select' || input.type === 'date' || input.type === 'file') ? 'change' : 'input';
             input.addEventListener(eventType, updateProgress);
         });
-        // --- FIM DA LÓGICA DA BARRA DE PROGRESSO ---
 
-        // Lógica original dos Equipamentos
+
         if (!containerCheckboxes || !displayEquipamentos || !hiddenInputEquipamentosData) {
-            updateProgress(); // Chama a barra de progresso mesmo se não houver equipamentos
+            updateProgress(); 
             return;
         }
 
@@ -556,7 +549,6 @@
             qInput.style.display = 'none'; 
         });
 
-        // Chamada inicial para ambos os scripts
         atualizarTudo(); 
     });
   </script>
